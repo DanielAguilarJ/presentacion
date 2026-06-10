@@ -2316,24 +2316,28 @@
             <div class="label">Configuración de Bloques</div>
             <div class="flex-col gap-12">
               <div class="flex-row gap-10" style="align-items: center;">
-                <span class="status-dot status-dot-green"></span>
-                <div style="font-size: 13px;"><strong>PUMP:</strong> P descarga = 40 bar</div>
+                <span class="status-dot status-dot-solar"></span>
+                <div style="font-size: 13px;"><strong>B3 (Heater):</strong> T<sub>out</sub> = 350°C, ΔP = 0 bar (Fresnel)</div>
               </div>
               <div class="flex-row gap-10" style="align-items: center;">
                 <span class="status-dot status-dot-solar"></span>
-                <div style="font-size: 13px;"><strong>B5 (HeatX):</strong> Shortcut, contracorriente, T<sub>hot,out</sub>=320°C, ΔT<sub>min</sub>=1°C</div>
+                <div style="font-size: 13px;"><strong>B6 (Mixer):</strong> Mezclador de retorno HTF, ΔP = 0 bar</div>
               </div>
               <div class="flex-row gap-10" style="align-items: center;">
-                <span class="status-dot status-dot-green"></span>
-                <div style="font-size: 13px;"><strong>B3 (Heater):</strong> T<sub>out</sub>=350°C, ΔP=0</div>
+                <span class="status-dot status-dot-solar"></span>
+                <div style="font-size: 13px;"><strong>B5 (HeatX):</strong> Shortcut, contracorriente, T<sub>hot,out</sub> = 320°C, ΔT<sub>min</sub> = 1°C</div>
               </div>
               <div class="flex-row gap-10" style="align-items: center;">
                 <span class="status-dot status-dot-blue"></span>
-                <div style="font-size: 13px;"><strong>TURBINE:</strong> Isentrópico, P<sub>desc</sub>=18 bar</div>
+                <div style="font-size: 13px;"><strong>TURBINE:</strong> Expansión isentrópica, P<sub>desc</sub> = 18 bar</div>
               </div>
               <div class="flex-row gap-10" style="align-items: center;">
                 <span class="status-dot status-dot-green"></span>
-                <div style="font-size: 13px;"><strong>CONDENSE:</strong> Frac. vapor = 0, ΔP=0</div>
+                <div style="font-size: 13px;"><strong>CONDENSE:</strong> Condensador, fracción de vapor = 0, ΔP = 0 bar</div>
+              </div>
+              <div class="flex-row gap-10" style="align-items: center;">
+                <span class="status-dot status-dot-green"></span>
+                <div style="font-size: 13px;"><strong>PUMP:</strong> Presurización de agua, P<sub>desc</sub> = 40 bar</div>
               </div>
             </div>
           </div>
@@ -2553,111 +2557,7 @@
   </section>
 
   <!-- ═══════════════════════════════════════════
-       SLIDE 10.4: ASPEN PLUS — BOMBA
-       ═══════════════════════════════════════════ -->
-  <section class="slide" data-section="Aspen Plus">
-    <div class="glow-orb glow-blue" style="width: 500px; height: 500px; bottom: -200px; left: -100px; opacity: 0.1;"></div>
-    <div class="slide-content">
-      <div class="section-badge anim-item anim-delay-1">
-        <div class="section-number">5</div>
-        <span class="label-accent">Aspen Plus · Bomba</span>
-      </div>
-
-      <h2 class="headline-medium anim-item anim-delay-2" style="margin-bottom: 24px;">
-        Especificaciones de <span class="gradient-text-blue">PUMP</span>
-      </h2>
-
-      <div class="grid-2 anim-item anim-delay-3" style="gap: 24px; align-items: center;">
-        <div class="flex-col gap-16">
-          <div class="glass-card flex-col gap-12" style="padding: 24px;">
-            <div class="label">Condiciones de Operación</div>
-            <p class="body-regular" style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
-              Definición de las condiciones mecánicas del impulsor de alimentación de agua hacia la caldera de alta presión.
-            </p>
-          </div>
-          <div class="card flex-col gap-8">
-            <div class="label">Parámetros</div>
-            <ul class="check-list" style="font-size: 13px;">
-              <li><strong>Modelo:</strong> Bomba centrífuga de líquido.</li>
-              <li><strong>Presión de descarga:</strong> <span class="mono" style="color: var(--accent-solar);">40 bar</span>.</li>
-              <li><strong>Objetivo:</strong> Eleva la presión de alimentación del agua para permitir la evaporación y sobrecalentamiento de alta presión.</li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="flex-col gap-16">
-          <div class="window-mockup">
-            <div class="window-header">
-              <div class="window-title">Aspen Plus V12.1 - [PUMP (Pump) - Specifications]</div>
-              <div class="window-buttons">
-                <span class="window-button minimize">🗕</span>
-                <span class="window-button maximize">🗖</span>
-                <span class="window-button close">🗙</span>
-              </div>
-            </div>
-            <div class="window-body">
-              <img src="assets/aspen_4.jpg" alt="Aspen Pump Specs">
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ═══════════════════════════════════════════
-       SLIDE 10.5: ASPEN PLUS — HEATX
-       ═══════════════════════════════════════════ -->
-  <section class="slide" data-section="Aspen Plus">
-    <div class="glow-orb glow-blue" style="width: 500px; height: 500px; top: -200px; right: -150px; opacity: 0.12;"></div>
-    <div class="slide-content">
-      <div class="section-badge anim-item anim-delay-1">
-        <div class="section-number">5</div>
-        <span class="label-accent">Aspen Plus · Intercambiador</span>
-      </div>
-
-      <h2 class="headline-medium anim-item anim-delay-2" style="margin-bottom: 24px;">
-        Generador de Vapor <span class="gradient-text-blue">B5 (HeatX)</span>
-      </h2>
-
-      <div class="grid-2 anim-item anim-delay-3" style="gap: 24px; align-items: center;">
-        <div class="flex-col gap-16">
-          <div class="glass-card flex-col gap-12" style="padding: 24px;">
-            <div class="label">Caldera / Intercambiador</div>
-            <p class="body-regular" style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
-              Acopla térmicamente el lazo de aceite térmico caliente (HTF) con el ciclo Rankine para generar vapor.
-            </p>
-          </div>
-          <div class="card flex-col gap-8">
-            <div class="label">Diseño Térmico</div>
-            <ul class="check-list" style="font-size: 13px;">
-              <li><strong>Model:</strong> Shortcut, contracorriente (`Countercurrent`).</li>
-              <li><strong>Temperatura de salida HTF:</strong> <span class="mono" style="color: var(--accent-solar);">320°C</span>.</li>
-              <li><strong>Acercamiento mínimo (ΔT_min):</strong> <span class="mono" style="color: var(--accent-blue);">1°C</span>, maximizando la eficiencia de transferencia.</li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="flex-col gap-16">
-          <div class="window-mockup">
-            <div class="window-header">
-              <div class="window-title">Aspen Plus V12.1 - [B5 (HeatX) - Specifications]</div>
-              <div class="window-buttons">
-                <span class="window-button minimize">🗕</span>
-                <span class="window-button maximize">🗖</span>
-                <span class="window-button close">🗙</span>
-              </div>
-            </div>
-            <div class="window-body">
-              <img src="assets/aspen_5.jpg" alt="Aspen HeatX Specs">
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ═══════════════════════════════════════════
-       SLIDE 10.6: ASPEN PLUS — HEATER
+       SLIDE 10.4: ASPEN PLUS — HEATER
        ═══════════════════════════════════════════ -->
   <section class="slide" data-section="Aspen Plus">
     <div class="glow-orb glow-blue" style="width: 500px; height: 500px; bottom: -200px; left: -100px; opacity: 0.1;"></div>
@@ -2709,7 +2609,7 @@
   </section>
 
   <!-- ═══════════════════════════════════════════
-       SLIDE 10.7: ASPEN PLUS — MIXER
+       SLIDE 10.5: ASPEN PLUS — MIXER
        ═══════════════════════════════════════════ -->
   <section class="slide" data-section="Aspen Plus">
     <div class="glow-orb glow-blue" style="width: 500px; height: 500px; top: -200px; right: -150px; opacity: 0.12;"></div>
@@ -2753,6 +2653,110 @@
             </div>
             <div class="window-body">
               <img src="assets/aspen_7.jpg" alt="Aspen Mixer Specs">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 10.6: ASPEN PLUS — HEATX
+       ═══════════════════════════════════════════ -->
+  <section class="slide" data-section="Aspen Plus">
+    <div class="glow-orb glow-blue" style="width: 500px; height: 500px; top: -200px; right: -150px; opacity: 0.12;"></div>
+    <div class="slide-content">
+      <div class="section-badge anim-item anim-delay-1">
+        <div class="section-number">5</div>
+        <span class="label-accent">Aspen Plus · Intercambiador</span>
+      </div>
+
+      <h2 class="headline-medium anim-item anim-delay-2" style="margin-bottom: 24px;">
+        Generador de Vapor <span class="gradient-text-blue">B5 (HeatX)</span>
+      </h2>
+
+      <div class="grid-2 anim-item anim-delay-3" style="gap: 24px; align-items: center;">
+        <div class="flex-col gap-16">
+          <div class="glass-card flex-col gap-12" style="padding: 24px;">
+            <div class="label">Caldera / Intercambiador</div>
+            <p class="body-regular" style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
+              Acopla térmicamente el lazo de aceite térmico caliente (HTF) con el ciclo Rankine para generar vapor.
+            </p>
+          </div>
+          <div class="card flex-col gap-8">
+            <div class="label">Diseño Térmico</div>
+            <ul class="check-list" style="font-size: 13px;">
+              <li><strong>Model:</strong> Shortcut, contracorriente (`Countercurrent`).</li>
+              <li><strong>Temperatura de salida HTF:</strong> <span class="mono" style="color: var(--accent-solar);">320°C</span>.</li>
+              <li><strong>Acercamiento mínimo (ΔT_min):</strong> <span class="mono" style="color: var(--accent-blue);">1°C</span>, maximizando la eficiencia de transferencia.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="flex-col gap-16">
+          <div class="window-mockup">
+            <div class="window-header">
+              <div class="window-title">Aspen Plus V12.1 - [B5 (HeatX) - Specifications]</div>
+              <div class="window-buttons">
+                <span class="window-button minimize">🗕</span>
+                <span class="window-button maximize">🗖</span>
+                <span class="window-button close">🗙</span>
+              </div>
+            </div>
+            <div class="window-body">
+              <img src="assets/aspen_5.jpg" alt="Aspen HeatX Specs">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 10.7: ASPEN PLUS — BOMBA
+       ═══════════════════════════════════════════ -->
+  <section class="slide" data-section="Aspen Plus">
+    <div class="glow-orb glow-blue" style="width: 500px; height: 500px; bottom: -200px; left: -100px; opacity: 0.1;"></div>
+    <div class="slide-content">
+      <div class="section-badge anim-item anim-delay-1">
+        <div class="section-number">5</div>
+        <span class="label-accent">Aspen Plus · Bomba</span>
+      </div>
+
+      <h2 class="headline-medium anim-item anim-delay-2" style="margin-bottom: 24px;">
+        Especificaciones de <span class="gradient-text-blue">PUMP</span>
+      </h2>
+
+      <div class="grid-2 anim-item anim-delay-3" style="gap: 24px; align-items: center;">
+        <div class="flex-col gap-16">
+          <div class="glass-card flex-col gap-12" style="padding: 24px;">
+            <div class="label">Condiciones de Operación</div>
+            <p class="body-regular" style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
+              Definición de las condiciones mecánicas del impulsor de alimentación de agua hacia la caldera de alta presión.
+            </p>
+          </div>
+          <div class="card flex-col gap-8">
+            <div class="label">Parámetros</div>
+            <ul class="check-list" style="font-size: 13px;">
+              <li><strong>Modelo:</strong> Bomba centrífuga de líquido.</li>
+              <li><strong>Presión de descarga:</strong> <span class="mono" style="color: var(--accent-solar);">40 bar</span>.</li>
+              <li><strong>Objetivo:</strong> Eleva la presión de alimentación del agua para permitir la evaporación y sobrecalentamiento de alta presión.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="flex-col gap-16">
+          <div class="window-mockup">
+            <div class="window-header">
+              <div class="window-title">Aspen Plus V12.1 - [PUMP (Pump) - Specifications]</div>
+              <div class="window-buttons">
+                <span class="window-button minimize">🗕</span>
+                <span class="window-button maximize">🗖</span>
+                <span class="window-button close">🗙</span>
+              </div>
+            </div>
+            <div class="window-body">
+              <img src="assets/aspen_4.jpg" alt="Aspen Pump Specs">
             </div>
           </div>
         </div>
