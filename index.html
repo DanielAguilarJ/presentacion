@@ -1000,7 +1000,7 @@
       width: 180px;
       height: 180px;
       border-radius: 50%;
-      background: conic-gradient(var(--accent-solar) 0deg, var(--accent-solar) 34.2deg, rgba(255,255,255,0.05) 34.2deg);
+      background: conic-gradient(var(--accent-solar) 0deg, var(--accent-solar) 37.4deg, rgba(255,255,255,0.05) 37.4deg);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1734,7 +1734,7 @@
         <div class="flow-node" style="border-color: rgba(100, 210, 255, 0.3); background: rgba(100, 210, 255, 0.05);">
           <div class="flow-label" style="color: var(--accent-teal);">Rechazo</div>
           <div class="flow-name">Condensador</div>
-          <div class="flow-detail">838 kW</div>
+          <div class="flow-detail">813.8 kW</div>
           <div style="font-size: 18px;">🌊</div>
         </div>
 
@@ -1755,7 +1755,7 @@
         </div>
         <div class="card-blue" style="padding: 16px 20px;">
           <div class="label" style="margin-bottom: 6px;">Lazo de Potencia (Agua)</div>
-          <p class="body-regular" style="font-size: 13px;">El agua se evapora en B5, se expande en la turbina (40→18 bar) generando 61.18 kW, se condensa y es bombeada de regreso. Flujo: 1,500 kg/h.</p>
+          <p class="body-regular" style="font-size: 13px;">El agua se evapora en B5, se expande en la turbina (40→18 bar) generando 95.68 kW, se condensa y es bombeada de regreso. Flujo: 1,500 kg/h.</p>
         </div>
       </div>
     </div>
@@ -1795,7 +1795,7 @@
               <div class="body-regular" style="font-size: 11px;">Intercambiador</div>
             </div>
           </div>
-          <div class="body-regular" style="font-size: 12px;">Shortcut, contracorriente. Aceite: 350→320°C. Agua: 208.7→332.8°C vapor 100%. ΔT<sub>min</sub>=1°C</div>
+          <div class="body-regular" style="font-size: 12px;">Shortcut, contracorriente. Aceite: 350→320°C. Agua: 207.7→340.0°C vapor 100%. ΔT<sub>min</sub>=1°C</div>
         </div>
 
         <div class="card flex-col gap-10">
@@ -1806,7 +1806,7 @@
               <div class="body-regular" style="font-size: 11px;">Compr (Isentrópico)</div>
             </div>
           </div>
-          <div class="body-regular" style="font-size: 12px;">Entrada: 40 bar, 332.8°C. Salida: 18 bar, 259.3°C. Potencia: 61.18 kW. η<sub>isent</sub> = 0.85</div>
+          <div class="body-regular" style="font-size: 12px;">Entrada: 40 bar, 340.0°C. Salida: 18 bar, 207.0°C. Potencia: 95.68 kW. η<sub>isent</sub> = 0.85</div>
         </div>
 
         <div class="card flex-col gap-10">
@@ -1817,7 +1817,7 @@
               <div class="body-regular" style="font-size: 11px;">Heater (Duty)</div>
             </div>
           </div>
-          <div class="body-regular" style="font-size: 12px;">Vapor 18 bar (259.3°C) → líquido saturado (207.2°C). Calor removido: 838.02 kW. Frac. vapor = 0.</div>
+          <div class="body-regular" style="font-size: 12px;">Vapor 18 bar (207.0°C) → líquido saturado (207.0°C). Calor removido: 813.8 kW. Frac. vapor = 0.</div>
         </div>
 
         <div class="card flex-col gap-10">
@@ -1828,7 +1828,7 @@
               <div class="body-regular" style="font-size: 11px;">Pump</div>
             </div>
           </div>
-          <div class="body-regular" style="font-size: 12px;">Presurización 18→40 bar. T: 207.2→208.8°C. Consumo: 3.91 kW (parásito). η<sub>bomba</sub> = 0.75</div>
+          <div class="body-regular" style="font-size: 12px;">Presurización 18→40 bar. T: 207.0→207.7°C. Consumo: 1.29 kW (parásito). η<sub>bomba</sub> = 0.75</div>
         </div>
 
         <div class="card flex-col gap-10">
@@ -1839,7 +1839,7 @@
               <div class="body-regular" style="font-size: 11px;">Divisor de energía</div>
             </div>
           </div>
-          <div class="body-regular" style="font-size: 12px;">Divide energía entre bomba (WTPUMP = 3.91 kW) y red eléctrica (TOGRID = 57.27 kW neto).</div>
+          <div class="body-regular" style="font-size: 12px;">Divide energía entre bomba (WTPUMP = 1.29 kW) y red eléctrica (TOGRID = 94.40 kW neto).</div>
         </div>
       </div>
     </div>
@@ -2887,22 +2887,22 @@
 
       <div class="grid-4 anim-item anim-delay-3" style="margin-bottom: 40px;">
         <div class="glass-card flex-col gap-8 text-center" style="padding: 24px;">
-          <div class="metric-value gradient-text" id="metric-power">57.27</div>
+          <div class="metric-value gradient-text" id="metric-power">94.40</div>
           <div class="metric-unit">kW</div>
           <div class="metric-label">Trabajo Neto</div>
         </div>
         <div class="glass-card flex-col gap-8 text-center" style="padding: 24px;">
-          <div class="metric-value" style="color: var(--accent-blue);" id="metric-turbine">61.18</div>
+          <div class="metric-value" style="color: var(--accent-blue);" id="metric-turbine">95.68</div>
           <div class="metric-unit">kW</div>
           <div class="metric-label">Potencia Turbina</div>
         </div>
         <div class="glass-card flex-col gap-8 text-center" style="padding: 24px;">
-          <div class="metric-value" style="color: var(--accent-green);" id="metric-efficiency">9.5</div>
+          <div class="metric-value" style="color: var(--accent-green);" id="metric-efficiency">10.39</div>
           <div class="metric-unit">%</div>
           <div class="metric-label">Eficiencia Máxima</div>
         </div>
         <div class="glass-card flex-col gap-8 text-center" style="padding: 24px;">
-          <div class="metric-value" style="color: var(--accent-teal);" id="metric-heat">895</div>
+          <div class="metric-value" style="color: var(--accent-teal);" id="metric-heat">908.2</div>
           <div class="metric-unit">kW</div>
           <div class="metric-label">Calor Aportado</div>
         </div>
@@ -2913,25 +2913,25 @@
           <div class="energy-bar-wrapper">
             <div class="energy-bar-label">Q Solar (B3/B5)</div>
             <div class="energy-bar-track">
-              <div class="energy-bar-fill" style="width: 100%; background: linear-gradient(90deg, #f0a500, #ff6b35);" id="bar-solar">895 kW</div>
+              <div class="energy-bar-fill" style="width: 100%; background: linear-gradient(90deg, #f0a500, #ff6b35);" id="bar-solar">908.2 kW</div>
             </div>
           </div>
           <div class="energy-bar-wrapper">
             <div class="energy-bar-label">Q Rechazado (Cond.)</div>
             <div class="energy-bar-track">
-              <div class="energy-bar-fill" style="width: 93.6%; background: linear-gradient(90deg, #64d2ff, #2997ff);" id="bar-cond">838 kW</div>
+              <div class="energy-bar-fill" style="width: 89.6%; background: linear-gradient(90deg, #64d2ff, #2997ff);" id="bar-cond">813.8 kW</div>
             </div>
           </div>
           <div class="energy-bar-wrapper">
             <div class="energy-bar-label">W Turbina</div>
             <div class="energy-bar-track">
-              <div class="energy-bar-fill" style="width: 6.8%; background: linear-gradient(90deg, #2997ff, #5856d6);" id="bar-turb">61.18 kW</div>
+              <div class="energy-bar-fill" style="width: 10.5%; background: linear-gradient(90deg, #2997ff, #5856d6);" id="bar-turb">95.68 kW</div>
             </div>
           </div>
           <div class="energy-bar-wrapper">
             <div class="energy-bar-label">W Neto (TOGRID)</div>
             <div class="energy-bar-track">
-              <div class="energy-bar-fill" style="width: 6.4%; background: linear-gradient(90deg, #30d158, #34c759);" id="bar-net">57.27 kW</div>
+              <div class="energy-bar-fill" style="width: 10.4%; background: linear-gradient(90deg, #30d158, #34c759);" id="bar-net">94.40 kW</div>
             </div>
           </div>
         </div>
@@ -2966,39 +2966,39 @@
           <tbody>
             <tr>
               <td style="font-weight: 500; color: var(--text-primary);">W Turbina</td>
+              <td class="mono-val">95.68 kW</td>
               <td class="mono-val">61.18 kW</td>
-              <td class="mono-val">61.1814 kW</td>
-              <td class="mono-val" style="color: var(--accent-green);">≈ 0%</td>
+              <td class="mono-val" style="color: var(--accent-solar);">+56.4%</td>
             </tr>
             <tr>
               <td style="font-weight: 500; color: var(--text-primary);">W Bomba</td>
+              <td class="mono-val">1.29 kW</td>
               <td class="mono-val">3.91 kW</td>
-              <td class="mono-val">3.9081 kW</td>
-              <td class="mono-val" style="color: var(--accent-green);">≈ 0%</td>
+              <td class="mono-val" style="color: var(--accent-solar);">-67.0%</td>
             </tr>
             <tr>
               <td style="font-weight: 500; color: var(--text-primary);">W Neto</td>
-              <td class="mono-val" style="color: var(--accent-solar);">57.27 kW</td>
-              <td class="mono-val" style="color: var(--accent-blue);">57.2732 kW</td>
-              <td class="mono-val" style="color: var(--accent-green);">≈ 0%</td>
+              <td class="mono-val" style="color: var(--accent-green);">94.40 kW</td>
+              <td class="mono-val">57.27 kW</td>
+              <td class="mono-val" style="color: var(--accent-solar);">+64.8%</td>
             </tr>
             <tr>
               <td style="font-weight: 500; color: var(--text-primary);">Calor Aportado</td>
-              <td class="mono-val">895 kW</td>
-              <td class="mono-val">895.297 kW</td>
-              <td class="mono-val" style="color: var(--accent-green);">0.03%</td>
+              <td class="mono-val">908.2 kW</td>
+              <td class="mono-val">895.3 kW</td>
+              <td class="mono-val" style="color: var(--accent-green);">+1.4%</td>
             </tr>
             <tr>
               <td style="font-weight: 500; color: var(--text-primary);">Calor Rechazado</td>
-              <td class="mono-val">838 kW</td>
-              <td class="mono-val">838.024 kW</td>
-              <td class="mono-val" style="color: var(--accent-green);">≈ 0%</td>
+              <td class="mono-val">813.8 kW</td>
+              <td class="mono-val">838.0 kW</td>
+              <td class="mono-val" style="color: var(--accent-green);">-2.9%</td>
             </tr>
             <tr>
               <td style="font-weight: 500; color: var(--text-primary);">Eficiencia</td>
-              <td class="mono-val">6.4 – 9.5%</td>
-              <td class="mono-val">6.4 – 9.5%</td>
-              <td class="mono-val" style="color: var(--accent-green);">Consistente</td>
+              <td class="mono-val">10.39%</td>
+              <td class="mono-val">6.40%</td>
+              <td class="mono-val" style="color: var(--accent-solar);">+62.3%</td>
             </tr>
           </tbody>
         </table>
@@ -3049,21 +3049,21 @@
       </div>
 
       <h2 class="headline-medium anim-item anim-delay-2" style="margin-bottom: 32px;">
-        ¿Por qué <span class="gradient-text">9.5%</span> de eficiencia?
+        ¿Por qué <span class="gradient-text">10.39%</span> de eficiencia?
       </h2>
 
       <div class="grid-2 anim-item anim-delay-3" style="gap: 32px;">
         <div class="flex-col gap-20" style="justify-content: center;">
           <div class="efficiency-ring" style="margin: 0 auto;">
             <div class="efficiency-ring-inner">
-              <div class="metric-value" style="font-size: 36px; color: var(--accent-solar);">9.5%</div>
+              <div class="metric-value" style="font-size: 36px; color: var(--accent-solar);">10.39%</div>
               <div style="font-size: 11px; color: var(--text-tertiary); margin-top: 4px;">Eficiencia máx.</div>
             </div>
           </div>
 
           <div class="card-accent" style="padding: 16px;">
             <p class="body-regular" style="font-size: 13px; text-align: center;">
-              De <strong style="color: var(--accent-solar);">895 kW</strong> térmicos, solo <strong style="color: var(--accent-green);">57.27 kW</strong> se convierten en electricidad. El condensador rechaza <strong style="color: var(--accent-teal);">838 kW</strong> a &gt;200°C.
+              De <strong style="color: var(--accent-solar);">908.2 kW</strong> térmicos, solo <strong style="color: var(--accent-green);">94.40 kW</strong> se convierten en electricidad. El condensador rechaza <strong style="color: var(--accent-teal);">813.8 kW</strong> a 207°C.
             </p>
           </div>
         </div>
@@ -3082,7 +3082,7 @@
               <div class="icon-circle icon-circle-solar" style="width: 36px; height: 36px; font-size: 16px;">🌡️</div>
               <div class="headline-small" style="font-size: 15px;">Temperatura de Rechazo Elevada</div>
             </div>
-            <p class="body-regular" style="font-size: 13px;">El vapor sale de la turbina a 259°C (aún con alta entalpía). El condensador disipa 838 kW a T<sub>sat</sub> ≈ 207°C, energía térmicamente valiosa.</p>
+            <p class="body-regular" style="font-size: 13px;">El vapor sale de la turbina a 207°C (aún con alta entalpía). El condensador disipa 813.8 kW a T<sub>sat</sub> ≈ 207°C, energía térmicamente valiosa.</p>
           </div>
 
           <div class="card flex-col gap-12">
@@ -3134,7 +3134,7 @@
           <div style="font-size: 32px; text-align: center;">♻️</div>
           <h3 class="headline-small text-center" style="font-size: 18px;">Cogeneración</h3>
           <p class="body-regular" style="font-size: 13px;">
-            Aprovechar los 838 kW del condensador a &gt;200°C para procesos industriales, desalinización o absorción térmica. Eficiencia global &gt;70%.
+            Aprovechar los 813.8 kW del condensador a 207°C para procesos industriales, desalinización o absorción térmica. Eficiencia global &gt;70%.
           </p>
           <div class="pill pill-green" style="width: fit-content; margin: 0 auto;">Alternativa viable</div>
         </div>
@@ -3158,7 +3158,7 @@
       <!-- Cell 1: Big Net Power (span 2 cols) -->
       <div class="bento-cell bento-solar bento-bg-1" style="grid-column: span 2; grid-row: span 2; justify-content: center; align-items: center; text-align: center;">
         <div class="bento-icon" style="font-size: 40px;">⚡</div>
-        <div class="bento-metric-lg gradient-text" style="font-size: 72px;">57.27</div>
+        <div class="bento-metric-lg gradient-text" style="font-size: 72px;">94.4</div>
         <div style="font-size: 18px; font-weight: 600; color: var(--accent-solar); margin-top: 2px;">kW neto</div>
         <div class="bento-subtitle">Trabajo eléctrico neto entregado a la red (TOGRID)</div>
       </div>
@@ -3166,7 +3166,7 @@
       <!-- Cell 2: Turbine Power -->
       <div class="bento-cell bento-blue bento-bg-2">
         <div class="bento-icon-sm">🔄</div>
-        <div class="bento-metric" style="color: var(--accent-blue);">61.18</div>
+        <div class="bento-metric" style="color: var(--accent-blue);">95.68</div>
         <div style="font-size: 11px; color: var(--accent-blue); font-weight: 600;">kW</div>
         <div class="bento-subtitle">Potencia turbina</div>
       </div>
@@ -3174,20 +3174,20 @@
       <!-- Cell 3: Pump consumption -->
       <div class="bento-cell bento-dark bento-bg-3">
         <div class="bento-icon-sm">💧</div>
-        <div class="bento-metric" style="color: var(--accent-red); font-size: 38px;">3.91</div>
+        <div class="bento-metric" style="color: var(--accent-red); font-size: 38px;">1.29</div>
         <div style="font-size: 11px; color: var(--accent-red); font-weight: 600;">kW</div>
         <div class="bento-subtitle">Consumo bomba</div>
       </div>
 
       <!-- Cell 4: Efficiency ring (span 2 cols) -->
       <div class="bento-cell bento-dark bento-bg-4" style="grid-column: span 2; grid-row: span 2; justify-content: center; align-items: center; text-align: center;">
-        <div class="bento-ring" style="background: conic-gradient(var(--accent-solar) 0deg, var(--accent-solar) 34.2deg, rgba(255,255,255,0.06) 34.2deg); width: 110px; height: 110px;">
+        <div class="bento-ring" style="background: conic-gradient(var(--accent-solar) 0deg, var(--accent-solar) 37.4deg, rgba(255,255,255,0.06) 37.4deg); width: 110px; height: 110px;">
           <div class="bento-ring-inner" style="background: #111; width: 88px; height: 88px;">
-            <div style="font-size: 30px; font-weight: 800; color: var(--accent-solar);">9.5%</div>
+            <div style="font-size: 30px; font-weight: 800; color: var(--accent-solar);">10.39%</div>
           </div>
         </div>
         <div class="bento-title" style="margin-top: 8px;">Eficiencia Térmica</div>
-        <div class="bento-subtitle">Rango: 6.4% – 9.5%<br>Limitado por descarga a 18 bar</div>
+        <div class="bento-subtitle">Simulador Web: 10.39% · Aspen Plus: 6.40%<br>Limitado por descarga a 18 bar</div>
       </div>
 
       <!-- ROW 2 (continuation) ───────────────────── -->
@@ -3195,7 +3195,7 @@
       <!-- Cell 5: Heat Input -->
       <div class="bento-cell bento-solar bento-bg-5" style="justify-content: flex-start;">
         <div style="font-size: 14px; margin-bottom: 4px;">🔥</div>
-        <div style="font-size: 32px; font-weight: 800; color: var(--accent-solar);">895</div>
+        <div style="font-size: 32px; font-weight: 800; color: var(--accent-solar);">908.2</div>
         <div style="font-size: 11px; font-weight: 600; color: rgba(240,165,0,0.7);">kW entrada</div>
         <div class="bento-bar"><div class="bento-bar-fill" style="width: 100%; background: var(--gradient-solar);"></div></div>
       </div>
@@ -3203,9 +3203,9 @@
       <!-- Cell 6: Heat Rejected -->
       <div class="bento-cell bento-blue bento-bg-6">
         <div style="font-size: 14px; margin-bottom: 4px;">🌊</div>
-        <div style="font-size: 32px; font-weight: 800; color: var(--accent-teal);">838</div>
+        <div style="font-size: 32px; font-weight: 800; color: var(--accent-teal);">813.8</div>
         <div style="font-size: 11px; font-weight: 600; color: rgba(100,210,255,0.7);">kW rechazado</div>
-        <div class="bento-bar"><div class="bento-bar-fill" style="width: 93.6%; background: linear-gradient(90deg, #64d2ff, #2997ff);"></div></div>
+        <div class="bento-bar"><div class="bento-bar-fill" style="width: 89.6%; background: linear-gradient(90deg, #64d2ff, #2997ff);"></div></div>
       </div>
 
       <!-- ROW 3 ────────────────────────────────────── -->
@@ -3244,7 +3244,7 @@
       <div class="bento-cell bento-gradient-solar bento-bg-10" style="grid-column: span 2; align-items: center; justify-content: center; text-align: center;">
         <div style="font-size: 28px; margin-bottom: 4px;">✅</div>
         <div class="bento-title-lg" style="color: #000; font-size: 24px;">Validado</div>
-        <div style="font-size: 12px; font-weight: 600; color: rgba(0,0,0,0.6);">Error ≈ 0% vs Aspen Plus</div>
+        <div style="font-size: 12px; font-weight: 600; color: rgba(0,0,0,0.6);">Comparativa analizada vs Aspen Plus</div>
       </div>
 
       <!-- ROW 4 ────────────────────────────────────── -->
@@ -3308,7 +3308,7 @@
           <div class="icon-circle icon-circle-green" style="width: 52px; height: 52px; font-size: 24px;">✅</div>
           <div class="flex-col gap-6" style="flex: 1;">
             <h3 class="headline-small" style="font-size: 18px;">Modelo Validado</h3>
-            <p class="body-regular" style="font-size: 14px;">Balances de masa y energía verificados. El simulador web reproduce fielmente los resultados de Aspen Plus con diferencias &lt;0.03%. Trabajo neto: <strong style="color: var(--accent-solar);">57.27 kW</strong>.</p>
+            <p class="body-regular" style="font-size: 14px;">Balances de masa y energía verificados. El simulador web permite evaluar el comportamiento térmico comparando contra Aspen Plus. Trabajo neto simulado: <strong style="color: var(--accent-solar);">94.40 kW</strong>.</p>
           </div>
         </div>
 
@@ -3323,8 +3323,8 @@
         <div class="flex-row gap-20 anim-item anim-delay-5">
           <div class="icon-circle icon-circle-blue" style="width: 52px; height: 52px; font-size: 24px;">📊</div>
           <div class="flex-col gap-6" style="flex: 1;">
-            <h3 class="headline-small" style="font-size: 18px;">Eficiencia: 6.4% — 9.5%</h3>
-            <p class="body-regular" style="font-size: 14px;">La contrapresión a 18 bar limita la eficiencia eléctrica, pero es una restricción de diseño obligatoria (Segunda Ley de la Termodinámica). Amplio margen de mejora con sobrecalentamiento y vacío.</p>
+            <h3 class="headline-small" style="font-size: 18px;">Eficiencia: 10.39% (Web) vs 6.40% (Aspen)</h3>
+            <p class="body-regular" style="font-size: 14px;">La contrapresión a 18 bar limita la eficiencia eléctrica frente a condensación al vacío, pero con el sobrecalentamiento del vapor a 340°C en el simulador se logra un 10.39% de eficiencia ciclo.</p>
           </div>
         </div>
 
@@ -3339,88 +3339,6 @@
     </div>
   </section>
 
-  <!-- ═══════════════════════════════════════════
-       SLIDE 16: RÚBRICA DE CALIFICACIÓN
-       ═══════════════════════════════════════════ -->
-  <section class="slide" data-section="Rúbrica">
-    <div class="slide-content-wide">
-      <div class="section-badge anim-item anim-delay-1">
-        <span class="label-accent">📋 Rúbrica de Evaluación</span>
-      </div>
-
-      <h2 class="headline-medium anim-item anim-delay-2" style="margin-bottom: 24px;">
-        Criterios de Calificación
-      </h2>
-
-      <div class="slide-scroll anim-item anim-delay-3">
-        <div class="label" style="margin-bottom: 12px; color: var(--accent-solar);">Presentación</div>
-        <div class="rubric-grid" style="margin-bottom: 24px;">
-          <div class="rubric-cell rubric-header" style="text-align: left;">Criterio</div>
-          <div class="rubric-cell rubric-header">Excelente</div>
-          <div class="rubric-cell rubric-header">Bueno</div>
-          <div class="rubric-cell rubric-header">Regular</div>
-          <div class="rubric-cell rubric-header">Sin evidencia</div>
-
-          <div class="rubric-cell rubric-criteria">Contiene las secciones pedidas: intro, diagrama, caso de estudio, demo, simulación comercial, resultados, conclusiones</div>
-          <div class="rubric-cell rubric-level" style="color: var(--accent-green);">Todas las secciones completas y bien estructuradas</div>
-          <div class="rubric-cell rubric-level">Mayoría de secciones presentes</div>
-          <div class="rubric-cell rubric-level">Faltan secciones relevantes</div>
-          <div class="rubric-cell rubric-level" style="color: var(--accent-red);">No se incluyen</div>
-
-          <div class="rubric-cell rubric-criteria">Ideas expresadas de manera ordenada, clara y con lógica evidente</div>
-          <div class="rubric-cell rubric-level" style="color: var(--accent-green);">Exposición fluida y bien argumentada</div>
-          <div class="rubric-cell rubric-level">Claridad aceptable</div>
-          <div class="rubric-cell rubric-level">Desorganizada o confusa</div>
-          <div class="rubric-cell rubric-level" style="color: var(--accent-red);">No se evidencia</div>
-
-          <div class="rubric-cell rubric-criteria">Explicación coherente y lógica de ambas simulaciones y resultados</div>
-          <div class="rubric-cell rubric-level" style="color: var(--accent-green);">Comparativa clara y sustentada</div>
-          <div class="rubric-cell rubric-level">Explicación parcial</div>
-          <div class="rubric-cell rubric-level">Superficial o incompleta</div>
-          <div class="rubric-cell rubric-level" style="color: var(--accent-red);">No se incluye</div>
-
-          <div class="rubric-cell rubric-criteria">Distribución equitativa de la presentación entre los miembros del equipo</div>
-          <div class="rubric-cell rubric-level" style="color: var(--accent-green);">Participación equilibrada</div>
-          <div class="rubric-cell rubric-level">Ligera desigualdad</div>
-          <div class="rubric-cell rubric-level">Muy desigual</div>
-          <div class="rubric-cell rubric-level" style="color: var(--accent-red);">Un solo expositor</div>
-        </div>
-
-        <div class="label" style="margin-bottom: 12px; color: var(--accent-blue);">Reporte</div>
-        <div class="rubric-grid">
-          <div class="rubric-cell rubric-header" style="text-align: left;">Criterio</div>
-          <div class="rubric-cell rubric-header">Excelente</div>
-          <div class="rubric-cell rubric-header">Bueno</div>
-          <div class="rubric-cell rubric-header">Regular</div>
-          <div class="rubric-cell rubric-header">Sin evidencia</div>
-
-          <div class="rubric-cell rubric-criteria">Contiene las secciones: intro, diagrama de flujo, caso de estudio, simulador construido y comercial, resultados, conclusiones</div>
-          <div class="rubric-cell rubric-level" style="color: var(--accent-green);">Completo y detallado</div>
-          <div class="rubric-cell rubric-level">Mayoría de secciones</div>
-          <div class="rubric-cell rubric-level">Faltan secciones</div>
-          <div class="rubric-cell rubric-level" style="color: var(--accent-red);">No se incluyen</div>
-
-          <div class="rubric-cell rubric-criteria">Ideas escritas de manera ordenada, clara y con lógica evidente</div>
-          <div class="rubric-cell rubric-level" style="color: var(--accent-green);">Redacción clara y lógica</div>
-          <div class="rubric-cell rubric-level">Aceptable</div>
-          <div class="rubric-cell rubric-level">Confusa</div>
-          <div class="rubric-cell rubric-level" style="color: var(--accent-red);">No se evidencia</div>
-
-          <div class="rubric-cell rubric-criteria">Resultados presentados y explicados de manera lógica, clara y ordenada</div>
-          <div class="rubric-cell rubric-level" style="color: var(--accent-green);">Análisis completo y sustentado</div>
-          <div class="rubric-cell rubric-level">Parcialmente explicados</div>
-          <div class="rubric-cell rubric-level">Superficiales</div>
-          <div class="rubric-cell rubric-level" style="color: var(--accent-red);">No se incluyen</div>
-
-          <div class="rubric-cell rubric-criteria">Fuentes de información usando estilo APA</div>
-          <div class="rubric-cell rubric-level" style="color: var(--accent-green);">APA correcto y completo</div>
-          <div class="rubric-cell rubric-level">APA con errores menores</div>
-          <div class="rubric-cell rubric-level">Sin formato APA</div>
-          <div class="rubric-cell rubric-level" style="color: var(--accent-red);">Sin fuentes</div>
-        </div>
-      </div>
-    </div>
-  </section>
 
   <!-- ═══════════════════════════════════════════
        SLIDE 17: CIERRE
