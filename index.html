@@ -1,0 +1,3600 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Presentación ejecutiva: Simulación de Energía Solar Fresnel - Comparativa Simulador Web vs Aspen Plus">
+  <title>Simulación Solar Fresnel — Presentación Ejecutiva</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* ═══════════════════════════════════════════
+       DESIGN SYSTEM
+       ═══════════════════════════════════════════ */
+    :root {
+      --bg-primary: #000000;
+      --bg-secondary: #0a0a0a;
+      --bg-card: rgba(255, 255, 255, 0.03);
+      --bg-card-hover: rgba(255, 255, 255, 0.06);
+      --bg-glass: rgba(255, 255, 255, 0.04);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(255, 255, 255, 0.12);
+
+      --text-primary: #f5f5f7;
+      --text-secondary: rgba(245, 245, 247, 0.6);
+      --text-tertiary: rgba(245, 245, 247, 0.4);
+      --text-caption: rgba(245, 245, 247, 0.35);
+
+      --accent-solar: #f0a500;
+      --accent-solar-dim: rgba(240, 165, 0, 0.15);
+      --accent-blue: #2997ff;
+      --accent-blue-dim: rgba(41, 151, 255, 0.12);
+      --accent-green: #30d158;
+      --accent-green-dim: rgba(48, 209, 88, 0.12);
+      --accent-red: #ff453a;
+      --accent-red-dim: rgba(255, 69, 58, 0.12);
+      --accent-purple: #bf5af2;
+      --accent-purple-dim: rgba(191, 90, 242, 0.12);
+      --accent-teal: #64d2ff;
+
+      --gradient-solar: linear-gradient(135deg, #f0a500, #ff6b35);
+      --gradient-hero: linear-gradient(180deg, rgba(240, 165, 0, 0.08) 0%, transparent 60%);
+      --gradient-blue: linear-gradient(135deg, #2997ff, #5856d6);
+
+      --font-display: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+
+      --transition-fast: 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      --transition-smooth: 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      --transition-spring: 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* ═══════════════════════════════════════════
+       RESET & BASE
+       ═══════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      font-size: 16px;
+      scroll-behavior: smooth;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      font-family: var(--font-display);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      cursor: default;
+      user-select: none;
+    }
+
+    /* ═══════════════════════════════════════════
+       PRESENTATION ENGINE
+       ═══════════════════════════════════════════ */
+    .presentation {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 60px 80px;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+      pointer-events: none;
+      will-change: opacity, transform;
+    }
+
+    .slide.active {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .slide.exiting {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+
+    /* ═══════════════════════════════════════════
+       NAVIGATION
+       ═══════════════════════════════════════════ */
+    .nav-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border-subtle);
+      z-index: 1000;
+      font-size: 13px;
+    }
+
+    .nav-progress {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .nav-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--text-tertiary);
+      transition: all var(--transition-fast);
+      cursor: pointer;
+    }
+
+    .nav-dot.active {
+      background: var(--accent-solar);
+      width: 20px;
+      border-radius: 3px;
+    }
+
+    .nav-dot.visited {
+      background: rgba(240, 165, 0, 0.4);
+    }
+
+    .nav-section {
+      color: var(--text-tertiary);
+      font-weight: 500;
+      letter-spacing: 0.02em;
+    }
+
+    .nav-counter {
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .nav-controls {
+      display: flex;
+      gap: 8px;
+    }
+
+    .nav-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-glass);
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      font-size: 14px;
+    }
+
+    .nav-btn:hover {
+      background: var(--bg-card-hover);
+      color: var(--text-primary);
+      border-color: var(--border-accent);
+    }
+
+    /* ═══════════════════════════════════════════
+       TYPOGRAPHY
+       ═══════════════════════════════════════════ */
+    .headline-hero {
+      font-size: clamp(48px, 7vw, 96px);
+      font-weight: 800;
+      line-height: 1.0;
+      letter-spacing: -0.03em;
+      text-align: center;
+    }
+
+    .headline-large {
+      font-size: clamp(36px, 5vw, 72px);
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -0.025em;
+    }
+
+    .headline-medium {
+      font-size: clamp(28px, 3.5vw, 48px);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+    }
+
+    .headline-small {
+      font-size: clamp(20px, 2.5vw, 32px);
+      font-weight: 600;
+      line-height: 1.2;
+      letter-spacing: -0.015em;
+    }
+
+    .body-large {
+      font-size: clamp(16px, 1.5vw, 22px);
+      font-weight: 400;
+      line-height: 1.6;
+      color: var(--text-secondary);
+    }
+
+    .body-regular {
+      font-size: clamp(14px, 1.2vw, 18px);
+      font-weight: 400;
+      line-height: 1.6;
+      color: var(--text-secondary);
+    }
+
+    .label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+    }
+
+    .label-accent {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent-solar);
+    }
+
+    .mono {
+      font-family: var(--font-mono);
+    }
+
+    .gradient-text {
+      background: var(--gradient-solar);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .gradient-text-blue {
+      background: var(--gradient-blue);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .text-center { text-align: center; }
+    .text-left { text-align: left; }
+
+    /* ═══════════════════════════════════════════
+       LAYOUT COMPONENTS
+       ═══════════════════════════════════════════ */
+    .slide-content {
+      max-width: 1200px;
+      width: 100%;
+    }
+
+    .slide-content-wide {
+      max-width: 1400px;
+      width: 100%;
+    }
+
+    .flex-row {
+      display: flex;
+      gap: 24px;
+      align-items: stretch;
+    }
+
+    .flex-col {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .gap-8 { gap: 8px; }
+    .gap-12 { gap: 12px; }
+    .gap-16 { gap: 16px; }
+    .gap-20 { gap: 20px; }
+    .gap-24 { gap: 24px; }
+    .gap-32 { gap: 32px; }
+    .gap-40 { gap: 40px; }
+    .gap-48 { gap: 48px; }
+
+    .mt-8 { margin-top: 8px; }
+    .mt-12 { margin-top: 12px; }
+    .mt-16 { margin-top: 16px; }
+    .mt-24 { margin-top: 24px; }
+    .mt-32 { margin-top: 32px; }
+    .mt-40 { margin-top: 40px; }
+    .mt-48 { margin-top: 48px; }
+
+    /* ═══════════════════════════════════════════
+       CARDS
+       ═══════════════════════════════════════════ */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      transition: all var(--transition-fast);
+    }
+
+    .card:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--border-accent);
+    }
+
+    .card-accent {
+      background: var(--accent-solar-dim);
+      border: 1px solid rgba(240, 165, 0, 0.2);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+    }
+
+    .card-blue {
+      background: var(--accent-blue-dim);
+      border: 1px solid rgba(41, 151, 255, 0.2);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+    }
+
+    .card-green {
+      background: var(--accent-green-dim);
+      border: 1px solid rgba(48, 209, 88, 0.2);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+    }
+
+    .card-purple {
+      background: var(--accent-purple-dim);
+      border: 1px solid rgba(191, 90, 242, 0.2);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(40px);
+      -webkit-backdrop-filter: blur(40px);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl);
+      padding: 32px;
+    }
+
+    /* ═══════════════════════════════════════════
+       DECORATIVE ELEMENTS
+       ═══════════════════════════════════════════ */
+    .glow-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(100px);
+      opacity: 0.3;
+      pointer-events: none;
+    }
+
+    .glow-solar {
+      background: radial-gradient(circle, var(--accent-solar) 0%, transparent 70%);
+    }
+
+    .glow-blue {
+      background: radial-gradient(circle, var(--accent-blue) 0%, transparent 70%);
+    }
+
+    .divider {
+      width: 60px;
+      height: 3px;
+      background: var(--gradient-solar);
+      border-radius: 2px;
+    }
+
+    .icon-circle {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+
+    .icon-circle-solar {
+      background: var(--accent-solar-dim);
+      border: 1px solid rgba(240, 165, 0, 0.25);
+    }
+
+    .icon-circle-blue {
+      background: var(--accent-blue-dim);
+      border: 1px solid rgba(41, 151, 255, 0.25);
+    }
+
+    .icon-circle-green {
+      background: var(--accent-green-dim);
+      border: 1px solid rgba(48, 209, 88, 0.25);
+    }
+
+    .icon-circle-purple {
+      background: var(--accent-purple-dim);
+      border: 1px solid rgba(191, 90, 242, 0.25);
+    }
+
+    .icon-circle-red {
+      background: var(--accent-red-dim);
+      border: 1px solid rgba(255, 69, 58, 0.25);
+    }
+
+    /* ═══════════════════════════════════════════
+       DATA VIZ / METRICS
+       ═══════════════════════════════════════════ */
+    .metric-value {
+      font-size: clamp(36px, 5vw, 64px);
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -0.03em;
+    }
+
+    .metric-unit {
+      font-size: clamp(16px, 2vw, 24px);
+      font-weight: 400;
+      color: var(--text-tertiary);
+      margin-left: 4px;
+    }
+
+    .metric-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    .bar-chart {
+      display: flex;
+      align-items: flex-end;
+      gap: 12px;
+      height: 180px;
+      padding-top: 20px;
+    }
+
+    .bar-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .bar-fill {
+      width: 100%;
+      border-radius: 6px 6px 0 0;
+      transition: height 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+      min-width: 40px;
+    }
+
+    .bar-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-tertiary);
+      text-align: center;
+    }
+
+    .bar-value {
+      font-size: 13px;
+      font-weight: 600;
+      font-family: var(--font-mono);
+    }
+
+    /* ═══════════════════════════════════════════
+       TABLE
+       ═══════════════════════════════════════════ */
+    .data-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .data-table thead {
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .data-table th {
+      padding: 12px 16px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      text-align: left;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .data-table td {
+      padding: 12px 16px;
+      font-size: 14px;
+      color: var(--text-secondary);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .data-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .data-table tbody tr {
+      transition: background var(--transition-fast);
+    }
+
+    .data-table tbody tr:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .data-table .mono-val {
+      font-family: var(--font-mono);
+      font-weight: 500;
+      font-size: 13px;
+    }
+
+    /* ═══════════════════════════════════════════
+       FLOW DIAGRAM
+       ═══════════════════════════════════════════ */
+    .flow-diagram {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      flex-wrap: nowrap;
+      width: 100%;
+    }
+
+    .flow-node {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 16px 12px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-card);
+      min-width: 110px;
+      text-align: center;
+      transition: all var(--transition-fast);
+    }
+
+    .flow-node:hover {
+      border-color: var(--accent-solar);
+      background: var(--accent-solar-dim);
+    }
+
+    .flow-arrow {
+      display: flex;
+      align-items: center;
+      color: var(--text-tertiary);
+      font-size: 20px;
+      padding: 0 4px;
+      flex-shrink: 0;
+    }
+
+    .flow-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+    }
+
+    .flow-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .flow-detail {
+      font-size: 11px;
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+    }
+
+    /* ═══════════════════════════════════════════
+       BADGES & PILLS
+       ═══════════════════════════════════════════ */
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    .pill-solar {
+      background: var(--accent-solar-dim);
+      color: var(--accent-solar);
+      border: 1px solid rgba(240, 165, 0, 0.25);
+    }
+
+    .pill-blue {
+      background: var(--accent-blue-dim);
+      color: var(--accent-blue);
+      border: 1px solid rgba(41, 151, 255, 0.25);
+    }
+
+    .pill-green {
+      background: var(--accent-green-dim);
+      color: var(--accent-green);
+      border: 1px solid rgba(48, 209, 88, 0.25);
+    }
+
+    /* ═══════════════════════════════════════════
+       COMPARISON GRID
+       ═══════════════════════════════════════════ */
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .compare-col {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .compare-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    /* ═══════════════════════════════════════════
+       ANIMATIONS
+       ═══════════════════════════════════════════ */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.2; }
+      50% { opacity: 0.4; }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    @keyframes shimmer {
+      0% { background-position: -200% center; }
+      100% { background-position: 200% center; }
+    }
+
+    @keyframes countUp {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes draw-line {
+      from { stroke-dashoffset: 1000; }
+      to { stroke-dashoffset: 0; }
+    }
+
+    .anim-item {
+      opacity: 0;
+      transform: translateY(15px);
+    }
+
+    .slide.active .anim-item {
+      animation: fadeInUp 0.5s ease forwards;
+    }
+
+    .slide.active .anim-delay-1 { animation-delay: 0.1s; }
+    .slide.active .anim-delay-2 { animation-delay: 0.2s; }
+    .slide.active .anim-delay-3 { animation-delay: 0.3s; }
+    .slide.active .anim-delay-4 { animation-delay: 0.4s; }
+    .slide.active .anim-delay-5 { animation-delay: 0.5s; }
+    .slide.active .anim-delay-6 { animation-delay: 0.6s; }
+    .slide.active .anim-delay-7 { animation-delay: 0.7s; }
+    .slide.active .anim-delay-8 { animation-delay: 0.8s; }
+
+    /* Reduce motion */
+    @media (prefers-reduced-motion: reduce) {
+      .slide { transition: opacity 0.3s ease; transform: none !important; }
+      .slide.active { transform: none !important; }
+      .anim-item { opacity: 1; transform: none; animation: none !important; }
+      .glow-orb { animation: none !important; }
+    }
+
+    /* ═══════════════════════════════════════════
+       SANKEY-STYLE ENERGY BAR
+       ═══════════════════════════════════════════ */
+    .energy-flow {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .energy-bar-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .energy-bar-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      width: 140px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .energy-bar-track {
+      flex: 1;
+      height: 28px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 6px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .energy-bar-fill {
+      height: 100%;
+      border-radius: 6px;
+      transition: width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      display: flex;
+      align-items: center;
+      padding-left: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: var(--font-mono);
+      color: rgba(0,0,0,0.8);
+    }
+
+    /* ═══════════════════════════════════════════
+       RUBRIC SECTION
+       ═══════════════════════════════════════════ */
+    .rubric-grid {
+      display: grid;
+      grid-template-columns: 2fr repeat(4, 1fr);
+      gap: 1px;
+      background: var(--border-subtle);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      font-size: 12px;
+    }
+
+    .rubric-cell {
+      padding: 12px 14px;
+      background: var(--bg-secondary);
+    }
+
+    .rubric-header {
+      background: rgba(240, 165, 0, 0.08);
+      font-weight: 600;
+      color: var(--accent-solar);
+      text-align: center;
+    }
+
+    .rubric-criteria {
+      font-weight: 500;
+      color: var(--text-primary);
+      line-height: 1.4;
+    }
+
+    .rubric-level {
+      color: var(--text-secondary);
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    /* ═══════════════════════════════════════════
+       KEYBOARD HINT
+       ═══════════════════════════════════════════ */
+    .kbd-hint {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      font-size: 11px;
+      color: var(--text-tertiary);
+      z-index: 1000;
+      opacity: 1;
+      transition: opacity 2s ease;
+    }
+
+    kbd {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 22px;
+      height: 22px;
+      padding: 0 6px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border-subtle);
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-secondary);
+    }
+
+    /* ═══════════════════════════════════════════
+       SPECIFIC SLIDE STYLES
+       ═══════════════════════════════════════════ */
+
+    /* Title slide */
+    .title-bg {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+    }
+
+    .title-bg .glow-orb {
+      animation: pulse-glow 4s ease-in-out infinite;
+    }
+
+    .title-lines {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(240, 165, 0, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(240, 165, 0, 0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+      -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+    }
+
+    /* 3-col grid */
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    /* Section header badge */
+    .section-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .section-number {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: var(--gradient-solar);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: #000;
+    }
+
+    /* Status indicator */
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .status-dot-green { background: var(--accent-green); box-shadow: 0 0 8px rgba(48, 209, 88, 0.5); }
+    .status-dot-solar { background: var(--accent-solar); box-shadow: 0 0 8px rgba(240, 165, 0, 0.5); }
+    .status-dot-blue { background: var(--accent-blue); box-shadow: 0 0 8px rgba(41, 151, 255, 0.5); }
+
+    /* Checkmark list */
+    .check-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .check-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 15px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .check-list li::before {
+      content: '✓';
+      color: var(--accent-green);
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* Stack tech pill row */
+    .tech-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tech-pill {
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+    }
+
+    /* Equation block */
+    .equation-block {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border-subtle);
+      border-left: 3px solid var(--accent-solar);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      padding: 16px 20px;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+
+    /* Scroll container for overflow slides */
+    .slide-scroll {
+      overflow-y: auto;
+      max-height: calc(100vh - 140px);
+      padding-right: 8px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255,255,255,0.1) transparent;
+    }
+
+    .slide-scroll::-webkit-scrollbar { width: 4px; }
+    .slide-scroll::-webkit-scrollbar-track { background: transparent; }
+    .slide-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+
+    /* Summary circle */
+    .efficiency-ring {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: conic-gradient(var(--accent-solar) 0deg, var(--accent-solar) 34.2deg, rgba(255,255,255,0.05) 34.2deg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .efficiency-ring-inner {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      background: var(--bg-primary);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Timeline section */
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      position: relative;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 15px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--accent-solar), var(--accent-blue), var(--accent-green));
+      opacity: 0.3;
+    }
+
+    .timeline-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 12px 0;
+    }
+
+    .timeline-dot {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--bg-primary);
+      border: 2px solid var(--accent-solar);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent-solar);
+      flex-shrink: 0;
+      z-index: 1;
+    }
+
+    .timeline-content {
+      flex: 1;
+      padding-top: 4px;
+    }
+    /* ═══════════════════════════════════════════
+       BENTO GRID — Apple Keynote Summary Style
+       ═══════════════════════════════════════════ */
+    .bento-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      grid-template-rows: repeat(4, auto);
+      gap: 10px;
+      width: 100%;
+      max-width: 1320px;
+    }
+
+    .bento-cell {
+      border-radius: 18px;
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      position: relative;
+      overflow: hidden;
+      min-height: 110px;
+      transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.35s ease;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .bento-cell:hover {
+      transform: scale(1.018);
+      box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+      z-index: 2;
+    }
+
+    /* Cell background variants */
+    .bento-dark {
+      background: #111111;
+    }
+
+    .bento-solar {
+      background: linear-gradient(145deg, #1a1200 0%, #2d1e00 100%);
+    }
+
+    .bento-blue {
+      background: linear-gradient(145deg, #0a1628 0%, #0f2040 100%);
+    }
+
+    .bento-green {
+      background: linear-gradient(145deg, #081a0a 0%, #0f2a12 100%);
+    }
+
+    .bento-purple {
+      background: linear-gradient(145deg, #160a28 0%, #1f1040 100%);
+    }
+
+    .bento-gradient-solar {
+      background: linear-gradient(145deg, #f0a500, #ff6b35);
+    }
+
+    .bento-gradient-blue {
+      background: linear-gradient(145deg, #2997ff, #5856d6);
+    }
+
+    .bento-deep {
+      background: #0a0a0a;
+    }
+
+    /* Bento typography */
+    .bento-metric {
+      font-size: 46px;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -0.04em;
+    }
+
+    .bento-metric-lg {
+      font-size: 62px;
+      font-weight: 800;
+      line-height: 0.95;
+      letter-spacing: -0.04em;
+    }
+
+    .bento-title {
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+    }
+
+    .bento-title-lg {
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+    }
+
+    .bento-subtitle {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      line-height: 1.4;
+      margin-top: 4px;
+    }
+
+    .bento-icon {
+      font-size: 34px;
+      margin-bottom: 10px;
+    }
+
+    .bento-icon-sm {
+      font-size: 24px;
+      margin-bottom: 6px;
+    }
+
+    /* Bento inner glow effects */
+    .bento-cell::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      opacity: 0;
+      transition: opacity 0.35s ease;
+      pointer-events: none;
+    }
+
+    .bento-solar::before {
+      background: radial-gradient(circle at 30% 30%, rgba(240, 165, 0, 0.12), transparent 60%);
+      opacity: 1;
+    }
+
+    .bento-blue::before {
+      background: radial-gradient(circle at 70% 30%, rgba(41, 151, 255, 0.1), transparent 60%);
+      opacity: 1;
+    }
+
+    /* Bento stagger animation */
+    @keyframes bentoPop {
+      0% { opacity: 0; transform: scale(0.92) translateY(12px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .slide.active .bento-cell {
+      animation: bentoPop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+
+    .slide.active .bento-cell:nth-child(1)  { animation-delay: 0.05s; }
+    .slide.active .bento-cell:nth-child(2)  { animation-delay: 0.08s; }
+    .slide.active .bento-cell:nth-child(3)  { animation-delay: 0.11s; }
+    .slide.active .bento-cell:nth-child(4)  { animation-delay: 0.14s; }
+    .slide.active .bento-cell:nth-child(5)  { animation-delay: 0.17s; }
+    .slide.active .bento-cell:nth-child(6)  { animation-delay: 0.20s; }
+    .slide.active .bento-cell:nth-child(7)  { animation-delay: 0.23s; }
+    .slide.active .bento-cell:nth-child(8)  { animation-delay: 0.26s; }
+    .slide.active .bento-cell:nth-child(9)  { animation-delay: 0.29s; }
+    .slide.active .bento-cell:nth-child(10) { animation-delay: 0.32s; }
+    .slide.active .bento-cell:nth-child(11) { animation-delay: 0.35s; }
+    .slide.active .bento-cell:nth-child(12) { animation-delay: 0.38s; }
+    .slide.active .bento-cell:nth-child(13) { animation-delay: 0.41s; }
+    .slide.active .bento-cell:nth-child(14) { animation-delay: 0.44s; }
+
+    /* Bento mini bar */
+    .bento-bar {
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(255,255,255,0.08);
+      margin-top: 10px;
+      overflow: hidden;
+    }
+
+    .bento-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 1s ease;
+    }
+
+    /* Bento ring */
+    .bento-ring {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px;
+    }
+
+    .bento-ring-inner {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+
+    /* Browser Mockup CSS */
+    .browser-mockup {
+      border-radius: 12px;
+      background: #1e1e1e;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 40px rgba(240, 165, 0, 0.15);
+      overflow: hidden;
+      transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    .browser-mockup:hover {
+      transform: translateY(-8px) scale(1.02) rotateX(1deg);
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), 0 0 50px rgba(240, 165, 0, 0.25);
+    }
+    .browser-header {
+      height: 36px;
+      background: #2d2d2d;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      position: relative;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      flex-shrink: 0;
+    }
+    .browser-buttons {
+      display: flex;
+      gap: 8px;
+    }
+    .browser-button {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .browser-button.close { background: #ff5f56; }
+    .browser-button.minimize { background: #ffbd2e; }
+    .browser-button.expand { background: #27c93f; }
+    .browser-address {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-secondary);
+      padding: 4px 20px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      pointer-events: none;
+    }
+    .browser-body {
+      position: relative;
+      background: #111;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .browser-body img {
+      width: 100%;
+      height: auto;
+      display: block;
+      transition: transform 0.5s ease;
+    }
+    .browser-mockup:hover .browser-body img {
+      transform: scale(1.01);
+    }
+
+    /* Windows-style GUI Mockup for Aspen Plus screenshots */
+    .window-mockup {
+      border-radius: 10px;
+      background: #f0f4f9;
+      border: 1px solid #c4d6eb;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), 0 0 15px rgba(41, 151, 255, 0.1);
+      overflow: hidden;
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    .window-mockup:hover {
+      transform: translateY(-5px) scale(1.01);
+      box-shadow: 0 25px 45px rgba(0, 0, 0, 0.6), 0 0 25px rgba(41, 151, 255, 0.2);
+    }
+    .window-header {
+      height: 32px;
+      background: #e1ecf7;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      border-bottom: 1px solid #c4d6eb;
+      user-select: none;
+      flex-shrink: 0;
+    }
+    .window-title {
+      font-size: 11px;
+      color: #333333;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-weight: 500;
+    }
+    .window-buttons {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .window-button {
+      font-size: 10px;
+      color: #555;
+      cursor: pointer;
+    }
+    .window-button.close:hover {
+      color: #ff5f56;
+    }
+    .window-body {
+      background: #ffffff;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .window-body img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border: 1px solid #e2e8f0;
+      transition: transform 0.4s ease;
+    }
+    .window-mockup:hover .window-body img {
+      transform: scale(1.01);
+    }
+
+    /* Bento Background Images */
+    .bento-bg-1 { background-image: linear-gradient(to top, rgba(0,0,0,0.85), rgba(0,0,0,0.2)), url('assets/net_power_bg.png'); background-size: cover; background-position: center; }
+    .bento-bg-2 { background-image: linear-gradient(to top, rgba(10,22,40,0.9), rgba(10,22,40,0.4)), url('assets/turbine_power_bg.png'); background-size: cover; background-position: center; }
+    .bento-bg-3 { background-image: linear-gradient(to top, rgba(17,17,17,0.9), rgba(17,17,17,0.4)), url('assets/pump_power_bg.png'); background-size: cover; background-position: center; }
+    .bento-bg-4 { background-image: linear-gradient(to top, rgba(17,17,17,0.9), rgba(17,17,17,0.4)), url('assets/efficiency_bg.png'); background-size: cover; background-position: center; }
+    .bento-bg-5 { background-image: linear-gradient(to top, rgba(26,18,0,0.9), rgba(26,18,0,0.4)), url('assets/heat_in_bg.png'); background-size: cover; background-position: center; }
+    .bento-bg-6 { background-image: linear-gradient(to top, rgba(10,22,40,0.9), rgba(10,22,40,0.4)), url('assets/heat_out_bg.png'); background-size: cover; background-position: center; }
+    .bento-bg-7 { background-image: linear-gradient(to right, rgba(22,10,40,0.95), rgba(22,10,40,0.5)), url('assets/dowtherm_bg.png'); background-size: cover; background-position: center; }
+    .bento-bg-8 { background-image: linear-gradient(to top, rgba(17,17,17,0.9), rgba(17,17,17,0.4)), url('assets/expansion_bg.png'); background-size: cover; background-position: center; }
+    .bento-bg-9 { background-image: linear-gradient(to top, rgba(17,17,17,0.9), rgba(17,17,17,0.4)), url('assets/nrtl_steam_bg.png'); background-size: cover; background-position: center; }
+    .bento-bg-10 { background-image: linear-gradient(to right, rgba(240,165,0,0.95), rgba(255,107,53,0.6)), url('assets/validated_bg.png'); background-size: cover; background-position: center; }
+    .bento-bg-11 { background-image: linear-gradient(to right, rgba(17,17,17,0.95), rgba(17,17,17,0.5)), url('assets/sim_web_bg.png'); background-size: cover; background-position: center; }
+    .bento-bg-12 { background-image: linear-gradient(to right, rgba(17,17,17,0.95), rgba(17,17,17,0.5)), url('assets/aspen_bg.png'); background-size: cover; background-position: center; }
+    .bento-bg-13 { background-image: linear-gradient(to top, rgba(8,26,10,0.9), rgba(8,26,10,0.4)), url('assets/vacuum_bg.png'); background-size: cover; background-position: center; }
+    .bento-bg-14 { background-image: linear-gradient(to top, rgba(8,26,10,0.9), rgba(8,26,10,0.4)), url('assets/cogen_bg.png'); background-size: cover; background-position: center; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .slide.active .bento-cell { animation: none; opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="presentation" id="presentation">
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 0: TITLE
+       ═══════════════════════════════════════════ -->
+  <section class="slide active" data-section="Inicio">
+    <div class="title-bg">
+      <div class="title-lines"></div>
+      <div class="glow-orb glow-solar" style="width: 600px; height: 600px; top: -200px; right: -100px;"></div>
+      <div class="glow-orb glow-blue" style="width: 400px; height: 400px; bottom: -150px; left: -100px;"></div>
+    </div>
+
+    <div class="slide-content flex-col gap-32 text-center" style="align-items: center; position: relative; z-index: 1;">
+      <div class="anim-item anim-delay-1">
+        <div class="label-accent" style="margin-bottom: 16px;">Temas Selectos de Energías Renovables</div>
+      </div>
+
+      <h1 class="headline-hero anim-item anim-delay-2">
+        Simulación de<br>
+        <span class="gradient-text">Energía Solar Fresnel</span>
+      </h1>
+
+      <p class="body-large anim-item anim-delay-3" style="max-width: 680px;">
+        Generación de electricidad mediante ciclo Rankine con concentrador solar lineal Fresnel y fluido caloportador Dowtherm-A
+      </p>
+
+      <div class="flex-row gap-16 anim-item anim-delay-4" style="margin-top: 8px;">
+        <span class="pill pill-solar">☀️ Simulador Web Interactivo</span>
+        <span class="pill pill-blue">⚙️ Validación en Aspen Plus</span>
+      </div>
+
+      <div class="anim-item anim-delay-5" style="margin-top: 24px;">
+        <p style="font-size: 13px; color: var(--text-tertiary);">Presentación Final — Ingeniería de Procesos</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 1: AGENDA / OVERVIEW
+       ═══════════════════════════════════════════ -->
+  <section class="slide" data-section="Agenda">
+    <div class="slide-content">
+      <div class="section-badge anim-item anim-delay-1">
+        <div class="label-accent">Vista General</div>
+      </div>
+
+      <h2 class="headline-medium anim-item anim-delay-1" style="margin-bottom: 40px;">
+        Estructura de la<br>Presentación
+      </h2>
+
+      <div class="timeline anim-item anim-delay-2">
+        <div class="timeline-item">
+          <div class="timeline-dot">1</div>
+          <div class="timeline-content">
+            <div class="headline-small" style="font-size: 16px;">Introducción</div>
+            <div class="body-regular" style="font-size: 13px;">Ventajas de la simulación y objetivo del proyecto</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot">2</div>
+          <div class="timeline-content">
+            <div class="headline-small" style="font-size: 16px;">Diagrama de Flujo</div>
+            <div class="body-regular" style="font-size: 13px;">Lazo térmico HTF Dowtherm-A + Ciclo Rankine</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot">3</div>
+          <div class="timeline-content">
+            <div class="headline-small" style="font-size: 16px;">Caso de Estudio</div>
+            <div class="body-regular" style="font-size: 13px;">Parámetros de operación y especificaciones del sistema</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot">4</div>
+          <div class="timeline-content">
+            <div class="headline-small" style="font-size: 16px;">Demo: Simulador Web</div>
+            <div class="body-regular" style="font-size: 13px;">Simulador interactivo Next.js con visualización 3D</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot">5</div>
+          <div class="timeline-content">
+            <div class="headline-small" style="font-size: 16px;">Simulación en Aspen Plus</div>
+            <div class="body-regular" style="font-size: 13px;">Configuración de módulos y validación comercial</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot">6</div>
+          <div class="timeline-content">
+            <div class="headline-small" style="font-size: 16px;">Resultados y Comparativa</div>
+            <div class="body-regular" style="font-size: 13px;">Análisis técnico y validación cruzada</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot">7</div>
+          <div class="timeline-content">
+            <div class="headline-small" style="font-size: 16px;">Conclusiones</div>
+            <div class="body-regular" style="font-size: 13px;">Hallazgos clave y propuestas de mejora</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 2: INTRODUCCIÓN — ¿Por qué simular?
+       ═══════════════════════════════════════════ -->
+  <section class="slide" data-section="Introducción">
+    <div class="glow-orb glow-solar" style="width: 500px; height: 500px; top: -200px; left: -150px; opacity: 0.15;"></div>
+    <div class="slide-content">
+      <div class="section-badge anim-item anim-delay-1">
+        <div class="section-number">1</div>
+        <span class="label-accent">Introducción</span>
+      </div>
+
+      <h2 class="headline-large anim-item anim-delay-1" style="margin-bottom: 12px;">
+        ¿Por qué usar<br><span class="gradient-text">simuladores?</span>
+      </h2>
+
+      <p class="body-large anim-item anim-delay-2" style="max-width: 700px; margin-bottom: 36px;">
+        Herramientas como Aspen Plus resuelven miles de ecuaciones de balances de materia y energía, permitiendo modelar el comportamiento real de fluidos.
+      </p>
+
+      <div class="grid-3 anim-item anim-delay-3">
+        <div class="card flex-col gap-12">
+          <div class="icon-circle icon-circle-green">🛡️</div>
+          <h3 class="headline-small" style="font-size: 18px;">Análisis sin riesgo</h3>
+          <p class="body-regular" style="font-size: 13px;">Evaluar escenarios críticos y condiciones extremas sin comprometer equipos ni personal.</p>
+        </div>
+        <div class="card flex-col gap-12">
+          <div class="icon-circle icon-circle-solar">⚡</div>
+          <h3 class="headline-small" style="font-size: 18px;">Optimización</h3>
+          <p class="body-regular" style="font-size: 13px;">Ajustar parámetros operativos para maximizar eficiencia energética y rendimiento del sistema.</p>
+        </div>
+        <div class="card flex-col gap-12">
+          <div class="icon-circle icon-circle-blue">💰</div>
+          <h3 class="headline-small" style="font-size: 18px;">Ahorro de costos</h3>
+          <p class="body-regular" style="font-size: 13px;">Reduce gastos en pruebas físicas, rediseños y paradas no programadas mediante validación virtual.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 3: OBJETIVOS DEL PROYECTO
+       ═══════════════════════════════════════════ -->
+  <section class="slide" data-section="Introducción">
+    <div class="slide-content">
+      <div class="section-badge anim-item anim-delay-1">
+        <div class="section-number">1</div>
+        <span class="label-accent">Objetivos</span>
+      </div>
+
+      <h2 class="headline-medium anim-item anim-delay-1" style="margin-bottom: 36px;">
+        Objetivo del Proyecto
+      </h2>
+
+      <p class="body-large anim-item anim-delay-2" style="max-width: 800px; margin-bottom: 36px;">
+        Desarrollar, simular y analizar un ciclo termodinámico de potencia integrado a una fuente térmica solar comparando un simulador construido y un simulador comercial.
+      </p>
+
+      <div class="grid-2 anim-item anim-delay-3">
+        <div class="card-accent flex-col gap-12">
+          <div style="font-size: 24px;">📐</div>
+          <h3 class="headline-small" style="font-size: 16px; color: var(--accent-solar);">Modelar Balances</h3>
+          <p class="body-regular" style="font-size: 13px;">Balances de materia y energía usando Dowtherm-A como caloportador y agua como fluido de trabajo.</p>
+        </div>
+        <div class="card-blue flex-col gap-12">
+          <div style="font-size: 24px;">⚡</div>
+          <h3 class="headline-small" style="font-size: 16px; color: var(--accent-blue);">Cuantificar Trabajo Neto</h3>
+          <p class="body-regular" style="font-size: 13px;">Cuantificar la generación eléctrica a partir de una carga térmica de entrada determinada.</p>
+        </div>
+        <div class="card-green flex-col gap-12">
+          <div style="font-size: 24px;">🔒</div>
+          <h3 class="headline-small" style="font-size: 16px; color: var(--accent-green);">Validar Restricciones</h3>
+          <p class="body-regular" style="font-size: 13px;">Identificar restricciones como la contrapresión de turbina para evitar condensación (límite: 18 bar).</p>
+        </div>
+        <div class="card-purple flex-col gap-12">
+          <div style="font-size: 24px;">📈</div>
+          <h3 class="headline-small" style="font-size: 16px; color: var(--accent-purple);">Evaluar Eficiencia</h3>
+          <p class="body-regular" style="font-size: 13px;">Evaluar eficiencia térmica global y propuestas de mejora para maximizar el aprovechamiento solar.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 4: COMPONENTES & MÉTODOS TERMODINÁMICOS
+       ═══════════════════════════════════════════ -->
+  <section class="slide" data-section="Introducción">
+    <div class="slide-content">
+      <div class="section-badge anim-item anim-delay-1">
+        <div class="section-number">1</div>
+        <span class="label-accent">Fundamentos</span>
+      </div>
+
+      <h2 class="headline-medium anim-item anim-delay-2" style="margin-bottom: 36px;">
+        Componentes y Métodos<br>Termodinámicos
+      </h2>
+
+      <div class="grid-2 anim-item anim-delay-3" style="gap: 32px;">
+        <div class="flex-col gap-24">
+          <div class="glass-card flex-col gap-16">
+            <div class="label">Fluidos de trabajo</div>
+            <div class="flex-row gap-16" style="flex-wrap: wrap;">
+              <div class="flex-col gap-4" style="flex: 1; min-width: 160px;">
+                <div class="headline-small" style="font-size: 18px;">Agua (H₂O)</div>
+                <div class="body-regular" style="font-size: 13px;">Fluido de trabajo principal en el ciclo Rankine de potencia.</div>
+                <span class="pill pill-blue" style="width: fit-content;">WATER</span>
+              </div>
+              <div class="flex-col gap-4" style="flex: 1; min-width: 160px;">
+                <div class="headline-small" style="font-size: 18px;">Dowtherm-A</div>
+                <div class="body-regular" style="font-size: 13px;">Mezcla eutéctica bifenilo / óxido de difenilo. Estable hasta ~400°C.</div>
+                <span class="pill pill-solar" style="width: fit-content;">DOWTH-01</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card flex-col gap-12">
+            <div style="font-size: 20px;">🧪</div>
+            <div class="headline-small" style="font-size: 16px;">¿Por qué Dowtherm-A?</div>
+            <p class="body-regular" style="font-size: 13px;">
+              Permite operar el campo solar hasta 350°C a baja presión. Usar agua directamente requeriría <strong style="color: var(--accent-red);">&gt;165 bar</strong>, incrementando costos y riesgo operativo.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex-col gap-24">
+          <div class="glass-card flex-col gap-16">
+            <div class="label">Método termodinámico</div>
+            <div class="flex-col gap-12">
+              <div class="flex-row gap-12" style="align-items: center;">
+                <span class="status-dot status-dot-green"></span>
+                <div>
+                  <div class="headline-small" style="font-size: 16px;">NRTL</div>
+                  <div class="body-regular" style="font-size: 12px;">Método base para cálculos de propiedades y equilibrio de fases</div>
+                </div>
+              </div>
+              <div class="flex-row gap-12" style="align-items: center;">
+                <span class="status-dot status-dot-blue"></span>
+                <div>
+                  <div class="headline-small" style="font-size: 16px;">STEAM-TA</div>
+                  <div class="body-regular" style="font-size: 12px;">Tablas ASME para cálculo preciso de propiedades del agua/vapor</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="equation-block">
+            <div style="color: var(--text-tertiary); font-size: 11px; margin-bottom: 8px;">BALANCE DE ENERGÍA (FELDER 7.4-15)</div>
+            ΔḢ + ΔĖ<sub>k</sub> + ΔĖ<sub>p</sub> = Q̇ − Ẇ<sub>s</sub><br>
+            <span style="color: var(--text-tertiary); font-size: 12px;">Despreciando Ek y Ep en estado estacionario</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 5: DIAGRAMA DE FLUJO
+       ═══════════════════════════════════════════ -->
+  <section class="slide" data-section="Diagrama de Flujo">
+    <div class="slide-content-wide">
+      <div class="section-badge anim-item anim-delay-1">
+        <div class="section-number">2</div>
+        <span class="label-accent">Diagrama de Flujo</span>
+      </div>
+
+      <h2 class="headline-medium anim-item anim-delay-2" style="margin-bottom: 12px;">
+        Sistema de Generación de Potencia
+      </h2>
+
+      <p class="body-regular anim-item anim-delay-2" style="margin-bottom: 32px; max-width: 700px;">
+        Dos lazos cerrados que interactúan térmicamente: el lazo de aceite térmico (HTF) y el ciclo Rankine de potencia.
+      </p>
+
+      <div class="flow-diagram anim-item anim-delay-3" style="margin-bottom: 32px;">
+        <div class="flow-node" style="border-color: rgba(240, 165, 0, 0.3); background: rgba(240, 165, 0, 0.05);">
+          <div class="flow-label" style="color: var(--accent-solar);">Campo Solar</div>
+          <div class="flow-name">B3 · Caldera</div>
+          <div class="flow-detail">350°C salida</div>
+          <div style="font-size: 18px;">☀️</div>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-node" style="border-color: rgba(191, 90, 242, 0.3); background: rgba(191, 90, 242, 0.05);">
+          <div class="flow-label" style="color: var(--accent-purple);">Control</div>
+          <div class="flow-name">B6 · Separador</div>
+          <div class="flow-detail">Fase control</div>
+          <div style="font-size: 18px;">🔀</div>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-node" style="border-color: rgba(255, 69, 58, 0.3); background: rgba(255, 69, 58, 0.05);">
+          <div class="flow-label" style="color: var(--accent-red);">Intercambio</div>
+          <div class="flow-name">B5 · HeatX</div>
+          <div class="flow-detail">350→320°C</div>
+          <div style="font-size: 18px;">🔥</div>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-node" style="border-color: rgba(41, 151, 255, 0.3); background: rgba(41, 151, 255, 0.05);">
+          <div class="flow-label" style="color: var(--accent-blue);">Expansión</div>
+          <div class="flow-name">Turbina</div>
+          <div class="flow-detail">40→18 bar</div>
+          <div style="font-size: 18px;">⚡</div>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-node" style="border-color: rgba(100, 210, 255, 0.3); background: rgba(100, 210, 255, 0.05);">
+          <div class="flow-label" style="color: var(--accent-teal);">Rechazo</div>
+          <div class="flow-name">Condensador</div>
+          <div class="flow-detail">838 kW</div>
+          <div style="font-size: 18px;">🌊</div>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-node" style="border-color: rgba(48, 209, 88, 0.3); background: rgba(48, 209, 88, 0.05);">
+          <div class="flow-label" style="color: var(--accent-green);">Presurización</div>
+          <div class="flow-name">Bomba</div>
+          <div class="flow-detail">18→40 bar</div>
+          <div style="font-size: 18px;">💧</div>
+        </div>
+      </div>
+
+      <div class="grid-2 anim-item anim-delay-4" style="gap: 16px;">
+        <div class="card-accent" style="padding: 16px 20px;">
+          <div class="label" style="margin-bottom: 6px;">Lazo Térmico (Aceite HTF)</div>
+          <p class="body-regular" style="font-size: 13px;">Dowtherm-A absorbe calor del campo solar (B3) a 350°C y lo transfiere al agua a través del intercambiador B5, saliendo a 320°C. Flujo: 10,000 kg/h a 5 bar.</p>
+        </div>
+        <div class="card-blue" style="padding: 16px 20px;">
+          <div class="label" style="margin-bottom: 6px;">Lazo de Potencia (Agua)</div>
+          <p class="body-regular" style="font-size: 13px;">El agua se evapora en B5, se expande en la turbina (40→18 bar) generando 61.18 kW, se condensa y es bombeada de regreso. Flujo: 1,500 kg/h.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 6: MÓDULOS DEL SISTEMA (DETALLE)
+       ═══════════════════════════════════════════ -->
+  <section class="slide" data-section="Diagrama de Flujo">
+    <div class="slide-content-wide">
+      <div class="section-badge anim-item anim-delay-1">
+        <div class="section-number">2</div>
+        <span class="label-accent">Módulos</span>
+      </div>
+
+      <h2 class="headline-medium anim-item anim-delay-2" style="margin-bottom: 32px;">
+        Especificaciones por Equipo
+      </h2>
+
+      <div class="grid-3 anim-item anim-delay-3" style="gap: 16px;">
+        <div class="card flex-col gap-10">
+          <div class="flex-row gap-8" style="align-items: center;">
+            <div class="icon-circle icon-circle-solar" style="width: 36px; height: 36px; border-radius: 8px; font-size: 16px;">☀️</div>
+            <div>
+              <div class="headline-small" style="font-size: 15px;">B3 — Caldera</div>
+              <div class="body-regular" style="font-size: 11px;">Heater</div>
+            </div>
+          </div>
+          <div class="body-regular" style="font-size: 12px;">Calienta Dowtherm-A hasta 350°C. ΔP = 0 bar. Fuente: energía solar concentrada.</div>
+        </div>
+
+        <div class="card flex-col gap-10">
+          <div class="flex-row gap-8" style="align-items: center;">
+            <div class="icon-circle icon-circle-red" style="width: 36px; height: 36px; border-radius: 8px; font-size: 16px;">🔥</div>
+            <div>
+              <div class="headline-small" style="font-size: 15px;">B5 — HeatX</div>
+              <div class="body-regular" style="font-size: 11px;">Intercambiador</div>
+            </div>
+          </div>
+          <div class="body-regular" style="font-size: 12px;">Shortcut, contracorriente. Aceite: 350→320°C. Agua: 208.7→332.8°C vapor 100%. ΔT<sub>min</sub>=1°C</div>
+        </div>
+
+        <div class="card flex-col gap-10">
+          <div class="flex-row gap-8" style="align-items: center;">
+            <div class="icon-circle icon-circle-blue" style="width: 36px; height: 36px; border-radius: 8px; font-size: 16px;">⚡</div>
+            <div>
+              <div class="headline-small" style="font-size: 15px;">Turbina</div>
+              <div class="body-regular" style="font-size: 11px;">Compr (Isentrópico)</div>
+            </div>
+          </div>
+          <div class="body-regular" style="font-size: 12px;">Entrada: 40 bar, 332.8°C. Salida: 18 bar, 259.3°C. Potencia: 61.18 kW. η<sub>isent</sub> = 0.85</div>
+        </div>
+
+        <div class="card flex-col gap-10">
+          <div class="flex-row gap-8" style="align-items: center;">
+            <div class="icon-circle" style="width: 36px; height: 36px; border-radius: 8px; font-size: 16px; background: rgba(100, 210, 255, 0.12); border: 1px solid rgba(100, 210, 255, 0.25);">🌊</div>
+            <div>
+              <div class="headline-small" style="font-size: 15px;">Condensador</div>
+              <div class="body-regular" style="font-size: 11px;">Heater (Duty)</div>
+            </div>
+          </div>
+          <div class="body-regular" style="font-size: 12px;">Vapor 18 bar (259.3°C) → líquido saturado (207.2°C). Calor removido: 838.02 kW. Frac. vapor = 0.</div>
+        </div>
+
+        <div class="card flex-col gap-10">
+          <div class="flex-row gap-8" style="align-items: center;">
+            <div class="icon-circle icon-circle-green" style="width: 36px; height: 36px; border-radius: 8px; font-size: 16px;">💧</div>
+            <div>
+              <div class="headline-small" style="font-size: 15px;">Bomba</div>
+              <div class="body-regular" style="font-size: 11px;">Pump</div>
+            </div>
+          </div>
+          <div class="body-regular" style="font-size: 12px;">Presurización 18→40 bar. T: 207.2→208.8°C. Consumo: 3.91 kW (parásito). η<sub>bomba</sub> = 0.75</div>
+        </div>
+
+        <div class="card flex-col gap-10">
+          <div class="flex-row gap-8" style="align-items: center;">
+            <div class="icon-circle icon-circle-purple" style="width: 36px; height: 36px; border-radius: 8px; font-size: 16px;">🔀</div>
+            <div>
+              <div class="headline-small" style="font-size: 15px;">B2 — FSplit</div>
+              <div class="body-regular" style="font-size: 11px;">Divisor de energía</div>
+            </div>
+          </div>
+          <div class="body-regular" style="font-size: 12px;">Divide energía entre bomba (WTPUMP = 3.91 kW) y red eléctrica (TOGRID = 57.27 kW neto).</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 7: CASO DE ESTUDIO
+       ═══════════════════════════════════════════ -->
+  <section class="slide" data-section="Caso de Estudio">
+    <div class="slide-content">
+      <div class="section-badge anim-item anim-delay-1">
+        <div class="section-number">3</div>
+        <span class="label-accent">Caso de Estudio</span>
+      </div>
+
+      <h2 class="headline-medium anim-item anim-delay-2" style="margin-bottom: 32px;">
+        Parámetros de Operación
+      </h2>
+
+      <div class="grid-2 anim-item anim-delay-3" style="gap: 24px;">
+        <div class="flex-col gap-16">
+          <div class="glass-card flex-col gap-12" style="padding: 24px;">
+            <div class="label" style="color: var(--accent-solar);">☀️ Campo Solar Fresnel</div>
+            <table class="data-table" style="font-size: 13px;">
+              <tbody>
+                <tr><td>Filas de espejos</td><td class="mono-val" style="text-align: right;">50</td></tr>
+                <tr><td>Ancho de espejo</td><td class="mono-val" style="text-align: right;">1.0 m</td></tr>
+                <tr><td>Largo de fila</td><td class="mono-val" style="text-align: right;">100 m</td></tr>
+                <tr><td>Área total</td><td class="mono-val" style="text-align: right; color: var(--accent-solar);">5,000 m²</td></tr>
+                <tr><td>DNI (irradiancia)</td><td class="mono-val" style="text-align: right;">850 W/m²</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="glass-card flex-col gap-12" style="padding: 24px;">
+            <div class="label" style="color: var(--accent-purple);">🧪 Aceite Térmico (Dowtherm-A)</div>
+            <table class="data-table" style="font-size: 13px;">
+              <tbody>
+                <tr><td>T entrada</td><td class="mono-val" style="text-align: right;">350°C</td></tr>
+                <tr><td>T salida</td><td class="mono-val" style="text-align: right;">320°C</td></tr>
+                <tr><td>Cp</td><td class="mono-val" style="text-align: right;">2.2 kJ/(kg·K)</td></tr>
+                <tr><td>Flujo másico</td><td class="mono-val" style="text-align: right;">10,000 kg/h</td></tr>
+                <tr><td>U intercambiador</td><td class="mono-val" style="text-align: right;">1.5 kW/(m²·K)</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="flex-col gap-16">
+          <div class="glass-card flex-col gap-12" style="padding: 24px;">
+            <div class="label" style="color: var(--accent-blue);">⚡ Ciclo Rankine</div>
+            <table class="data-table" style="font-size: 13px;">
+              <tbody>
+                <tr><td>T vapor (sobrecalent.)</td><td class="mono-val" style="text-align: right;">340°C</td></tr>
+                <tr><td>P alta (turbina entrada)</td><td class="mono-val" style="text-align: right; color: var(--accent-blue);">40 bar</td></tr>
+                <tr><td>P descarga (turbina salida)</td><td class="mono-val" style="text-align: right; color: var(--accent-red);">18 bar</td></tr>
+                <tr><td>η turbina</td><td class="mono-val" style="text-align: right;">85%</td></tr>
+                <tr><td>η bomba</td><td class="mono-val" style="text-align: right;">75%</td></tr>
+                <tr><td>Flujo de agua</td><td class="mono-val" style="text-align: right;">1,500 kg/h</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="glass-card flex-col gap-12" style="padding: 24px;">
+            <div class="label" style="color: var(--accent-green);">🏭 Operación</div>
+            <table class="data-table" style="font-size: 13px;">
+              <tbody>
+                <tr><td>T ambiente</td><td class="mono-val" style="text-align: right;">25°C</td></tr>
+                <tr><td>Horas/día</td><td class="mono-val" style="text-align: right;">8 h</td></tr>
+                <tr><td>Días/año</td><td class="mono-val" style="text-align: right;">280</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card-accent" style="padding: 16px;">
+            <div class="body-regular" style="font-size: 12px;">
+              <strong style="color: var(--accent-solar);">Justificación P = 18 bar:</strong> Evitar que el vapor alcance su temperatura de rocío dentro de la turbina. La condensación parcial genera impacto destructivo y erosión severa en los álabes.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 8: DEMO SIMULADOR WEB
+       ═══════════════════════════════════════════ -->
+  <section class="slide" data-section="Demo Simulador Web">
+    <div class="glow-orb glow-solar" style="width: 600px; height: 600px; top: -250px; right: -200px; opacity: 0.12;"></div>
+    <div class="slide-content">
+      <div class="section-badge anim-item anim-delay-1">
+        <div class="section-number">4</div>
+        <span class="label-accent">Simulador Construido</span>
+      </div>
+
+      <h2 class="headline-large anim-item anim-delay-2" style="margin-bottom: 8px;">
+        Generador de Vapor<br><span class="gradient-text">Fresnel</span>
+      </h2>
+
+      <p class="body-regular anim-item anim-delay-2" style="margin-bottom: 24px;">
+        Simulador termodinámico interactivo en la web con visualización 3D en tiempo real
+      </p>
+
+      <div class="flex-row gap-8 anim-item anim-delay-3" style="margin-bottom: 28px; flex-wrap: wrap;">
+        <span class="pill pill-solar">☀️ generador-de-vapor.vercel.app</span>
+        <span class="pill pill-blue">⚡ Recálculo en &lt;100ms</span>
+        <span class="pill pill-green">✓ Open Source</span>
+      </div>
+
+      <div class="grid-2 anim-item anim-delay-4" style="gap: 20px;">
+        <div class="flex-col gap-16">
+          <div class="glass-card flex-col gap-16" style="padding: 24px;">
+            <div class="label">Stack Tecnológico</div>
+            <div class="tech-pills">
+              <span class="tech-pill">Next.js 15</span>
+              <span class="tech-pill">React 19</span>
+              <span class="tech-pill">TypeScript</span>
+              <span class="tech-pill">Three.js</span>
+              <span class="tech-pill">React Three Fiber</span>
+              <span class="tech-pill">Chart.js</span>
+              <span class="tech-pill">Framer Motion</span>
+              <span class="tech-pill">TailwindCSS</span>
+            </div>
+          </div>
+
+          <div class="card flex-col gap-10">
+            <div class="label">Funcionalidades Clave</div>
+            <ul class="check-list" style="font-size: 13px;">
+              <li>Visualización 3D interactiva del campo solar</li>
+              <li>Panel de parámetros con +20 variables ajustables</li>
+              <li>Diagrama T-s del ciclo Rankine en tiempo real</li>
+              <li>Simulación dinámica hora a hora (6am-6pm)</li>
+              <li>Exportación de reportes estilo Aspen Plus</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="flex-col gap-16" style="justify-content: center;">
+          <!-- Browser Mockup showcasing the screenshot -->
+          <div class="browser-mockup">
+            <div class="browser-header">
+              <div class="browser-buttons">
+                <span class="browser-button close"></span>
+                <span class="browser-button minimize"></span>
+                <span class="browser-button expand"></span>
+              </div>
+              <div class="browser-address">solar-fresnel.vercel.app</div>
+            </div>
+            <div class="browser-body">
+              <img src="assets/sim_screenshot.png" alt="Simulador Solar Fresnel Pro">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 8.1: SIMULADOR WEB — DASHBOARD
+       ═══════════════════════════════════════════ -->
+  <section class="slide" data-section="Demo Simulador Web">
+    <div class="glow-orb glow-solar" style="width: 500px; height: 500px; bottom: -200px; left: -100px; opacity: 0.1;"></div>
+    <div class="slide-content">
+      <div class="section-badge anim-item anim-delay-1">
+        <div class="section-number">4</div>
+        <span class="label-accent">Simulador Web · Panel de Control</span>
+      </div>
+
+      <h2 class="headline-medium anim-item anim-delay-2" style="margin-bottom: 24px;">
+        Monitoreo de <span class="gradient-text">Resultados de Corrientes</span>
+      </h2>
+
+      <div class="grid-2 anim-item anim-delay-3" style="gap: 24px; align-items: center;">
+        <div class="flex-col gap-16">
+          <div class="glass-card flex-col gap-12" style="padding: 24px;">
+            <div class="label">Panel de Dashboard</div>
+            <p class="body-regular" style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
+              Visualización central de las propiedades termodinámicas de cada corriente del circuito en tiempo real.
+            </p>
+          </div>
+          <div class="card flex-col gap-8">
+            <div class="label">Variables Clave</div>
+            <ul class="check-list" style="font-size: 13px;">
+              <li><strong>Resultados de Corrientes:</strong> Muestra T, P, Entalpía, Flujo y Fase para agua/vapor y HTF.</li>
+              <li><strong>Circuito HTF (Dowtherm-A):</strong> Ingreso al intercambiador a 350°C y retorno al campo solar a 320°C.</li>
+              <li><strong>Panel lateral de KPIs:</strong> Cálculo instantáneo de potencia neta, calor de entrada y eficiencia de ciclo.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="flex-col gap-16">
+          <div class="browser-mockup">
+            <div class="browser-header">
+              <div class="browser-buttons">
+                <span class="browser-button close"></span>
+                <span class="browser-button minimize"></span>
+                <span class="browser-button expand"></span>
+              </div>
+              <div class="browser-address">solar-fresnel.vercel.app/dashboard</div>
+            </div>
+            <div class="browser-body">
+              <img src="assets/fresnel_2.png" alt="Simulador Dashboard">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 8.2: SIMULADOR WEB — GRÁFICAS DE RENDIMIENTO
+       ═══════════════════════════════════════════ -->
+  <section class="slide" data-section="Demo Simulador Web">
+    <div class="glow-orb glow-solar" style="width: 500px; height: 500px; top: -200px; right: -150px; opacity: 0.12;"></div>
+    <div class="slide-content">
+      <div class="section-badge anim-item anim-delay-1">
+        <div class="section-number">4</div>
+        <span class="label-accent">Simulador Web · Gráficos</span>
+      </div>
+
+      <h2 class="headline-medium anim-item anim-delay-2" style="margin-bottom: 24px;">
+        Análisis <span class="gradient-text">T-s y Sankey</span> del Ciclo
+      </h2>
+
+      <div class="grid-2 anim-item anim-delay-3" style="gap: 24px; align-items: center;">
+        <div class="flex-col gap-16">
+          <div class="glass-card flex-col gap-12" style="padding: 24px;">
+            <div class="label">Visualizaciones Termodinámicas</div>
+            <p class="body-regular" style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
+              Gráficos interactivos dinámicos que facilitan el análisis de pérdidas térmicas y generación mecánica.
+            </p>
+          </div>
+          <div class="card flex-col gap-8">
+            <div class="label">Diagramas Clave</div>
+            <ul class="check-list" style="font-size: 13px;">
+              <li><strong>Diagrama T-s:</strong> Representa los 4 estados del ciclo Rankine sobre la curva de saturación de agua.</li>
+              <li><strong>Diagrama de Sankey:</strong> Muestra la conservación de energía (Aporte solar vs pérdidas del condensador).</li>
+              <li><strong>Justificación Académica:</strong> Alertas dinámicas sobre el salto entálpico y el calor de rechazo.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="flex-col gap-16">
+          <div class="browser-mockup">
+            <div class="browser-header">
+              <div class="browser-buttons">
+                <span class="browser-button close"></span>
+                <span class="browser-button minimize"></span>
+                <span class="browser-button expand"></span>
+              </div>
+              <div class="browser-address">solar-fresnel.vercel.app/charts</div>
+            </div>
+            <div class="browser-body">
+              <img src="assets/fresnel_3.png" alt="Simulador Charts">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 8.3: SIMULADOR WEB — SENSIBILIDAD Y PRODUCCIÓN
+       ═══════════════════════════════════════════ -->
+  <section class="slide" data-section="Demo Simulador Web">
+    <div class="glow-orb glow-solar" style="width: 500px; height: 500px; bottom: -200px; left: -100px; opacity: 0.1;"></div>
+    <div class="slide-content">
+      <div class="section-badge anim-item anim-delay-1">
+        <div class="section-number">4</div>
+        <span class="label-accent">Simulador Web · Sensibilidad</span>
+      </div>
+
+      <h2 class="headline-medium anim-item anim-delay-2" style="margin-bottom: 24px;">
+        Sensibilidad vs <span class="gradient-text">DNI y Producción Anual</span>
+      </h2>
+
+      <div class="grid-2 anim-item anim-delay-3" style="gap: 24px; align-items: center;">
+        <div class="flex-col gap-16">
+          <div class="glass-card flex-col gap-12" style="padding: 24px;">
+            <div class="label">Estudio de Escenarios</div>
+            <p class="body-regular" style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
+              Evaluación del comportamiento de la planta bajo diferentes condiciones de radiación solar estacional.
+            </p>
+          </div>
+          <div class="card flex-col gap-8">
+            <div class="label">Gráficas Analíticas</div>
+            <ul class="check-list" style="font-size: 13px;">
+              <li><strong>Sensibilidad vs DNI:</strong> Monitoreo de potencia neta generada y flujo de vapor al variar la irradiancia.</li>
+              <li><strong>Histograma de Producción:</strong> Estimación de la energía eléctrica mensual generada (MWh).</li>
+              <li><strong>Proyección Anual:</strong> Totalización anual automatizada basada en promedios históricos.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="flex-col gap-16">
+          <div class="browser-mockup">
+            <div class="browser-header">
+              <div class="browser-buttons">
+                <span class="browser-button close"></span>
+                <span class="browser-button minimize"></span>
+                <span class="browser-button expand"></span>
+              </div>
+              <div class="browser-address">solar-fresnel.vercel.app/sensitivity</div>
+            </div>
+            <div class="browser-body">
+              <img src="assets/fresnel_4.png" alt="Simulador Sensitivity">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 8.4: SIMULADOR WEB — EXPORTACIÓN Y REPORTES
+       ═══════════════════════════════════════════ -->
+  <section class="slide" data-section="Demo Simulador Web">
+    <div class="glow-orb glow-solar" style="width: 500px; height: 500px; top: -200px; right: -150px; opacity: 0.12;"></div>
+    <div class="slide-content">
+      <div class="section-badge anim-item anim-delay-1">
+        <div class="section-number">4</div>
+        <span class="label-accent">Simulador Web · Exportación</span>
+      </div>
+
+      <h2 class="headline-medium anim-item anim-delay-2" style="margin-bottom: 24px;">
+        Reportes y <span class="gradient-text">Comparativa de Modelos</span>
+      </h2>
+
+      <div class="grid-2 anim-item anim-delay-3" style="gap: 24px; align-items: center;">
+        <div class="flex-col gap-16">
+          <div class="glass-card flex-col gap-12" style="padding: 24px;">
+            <div class="label">Módulo de Exportación</div>
+            <p class="body-regular" style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
+              Generador automático de reportes de balance químico y comparación en tiempo real frente al estándar comercial.
+            </p>
+          </div>
+          <div class="card flex-col gap-8">
+            <div class="label">Funciones de Reportes</div>
+            <ul class="check-list" style="font-size: 13px;">
+              <li><strong>Comparación vs Aspen:</strong> Muestra los valores de referencia (Ref) frente a los simulados (Sim) en tiempo real.</li>
+              <li><strong>Vista previa de Reportes:</strong> Formato estructurado bajo metodología de Felder & Rousseau.</li>
+              <li><strong>Congelación de Escenarios:</strong> Guardado local de corridas exitosas.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="flex-col gap-16">
+          <div class="browser-mockup">
+            <div class="browser-header">
+              <div class="browser-buttons">
+                <span class="browser-button close"></span>
+                <span class="browser-button minimize"></span>
+                <span class="browser-button expand"></span>
+              </div>
+              <div class="browser-address">solar-fresnel.vercel.app/export</div>
+            </div>
+            <div class="browser-body">
+              <img src="assets/fresnel_5.png" alt="Simulador Export">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 9: SIMULADOR — ESTADOS TERMODINÁMICOS
+       ═══════════════════════════════════════════ -->
+  <section class="slide" data-section="Demo Simulador Web">
+    <div class="slide-content">
+      <div class="section-badge anim-item anim-delay-1">
+        <div class="section-number">4</div>
+        <span class="label-accent">Estados Termodinámicos</span>
+      </div>
+
+      <h2 class="headline-medium anim-item anim-delay-2" style="margin-bottom: 32px;">
+        Ciclo Rankine: 4 Estados
+      </h2>
+
+      <div class="anim-item anim-delay-3" style="margin-bottom: 32px;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Estado</th>
+              <th>Ubicación</th>
+              <th>T (°C)</th>
+              <th>P (bar)</th>
+              <th>H (kJ/kg)</th>
+              <th>S (kJ/kg·K)</th>
+              <th>Fase</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span style="color: var(--accent-green); font-weight: 600;">S1</span></td>
+              <td>Salida bomba</td>
+              <td class="mono-val">208.8</td>
+              <td class="mono-val">40</td>
+              <td class="mono-val">163</td>
+              <td class="mono-val">0.56</td>
+              <td><span class="pill pill-blue" style="font-size: 10px; padding: 2px 8px;">Líquido</span></td>
+            </tr>
+            <tr>
+              <td><span style="color: var(--accent-red); font-weight: 600;">S2</span></td>
+              <td>Salida intercambiador</td>
+              <td class="mono-val">332.8</td>
+              <td class="mono-val">40</td>
+              <td class="mono-val">3,092</td>
+              <td class="mono-val">7.01</td>
+              <td><span class="pill pill-solar" style="font-size: 10px; padding: 2px 8px;">Vapor 100%</span></td>
+            </tr>
+            <tr>
+              <td><span style="color: var(--accent-purple); font-weight: 600;">S3</span></td>
+              <td>Salida turbina</td>
+              <td class="mono-val">259.3</td>
+              <td class="mono-val">18</td>
+              <td class="mono-val">2,340</td>
+              <td class="mono-val">7.24</td>
+              <td><span class="pill pill-green" style="font-size: 10px; padding: 2px 8px;">Vapor</span></td>
+            </tr>
+            <tr>
+              <td><span style="color: var(--accent-blue); font-weight: 600;">S4</span></td>
+              <td>Salida condensador</td>
+              <td class="mono-val">207.2</td>
+              <td class="mono-val">18</td>
+              <td class="mono-val">145</td>
+              <td class="mono-val">0.50</td>
+              <td><span class="pill pill-blue" style="font-size: 10px; padding: 2px 8px;">Líquido sat.</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="grid-2 anim-item anim-delay-4" style="gap: 20px;">
+        <div class="equation-block" style="font-size: 13px;">
+          <div style="color: var(--text-tertiary); font-size: 10px; margin-bottom: 6px;">LMTD (DIFERENCIA MEDIA LOGARÍTMICA)</div>
+          ΔT₁ = T<sub>hot,in</sub> − T<sub>cold,out</sub><br>
+          ΔT₂ = T<sub>hot,out</sub> − T<sub>cold,in</sub><br>
+          LMTD = (ΔT₁ − ΔT₂) / ln(ΔT₁/ΔT₂)
+        </div>
+
+        <div class="equation-block" style="font-size: 13px;">
+          <div style="color: var(--text-tertiary); font-size: 10px; margin-bottom: 6px;">TRANSFERENCIA DE CALOR</div>
+          Q = U × A × LMTD<br>
+          A = Q / (U × LMTD)<br>
+          <span style="color: var(--text-tertiary);">U = 1.5 kW/(m²·K)</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 10: ASPEN PLUS — SIMULACIÓN COMERCIAL
+       ═══════════════════════════════════════════ -->
+  <section class="slide" data-section="Aspen Plus">
+    <div class="glow-orb glow-blue" style="width: 500px; height: 500px; top: -200px; right: -150px; opacity: 0.12;"></div>
+    <div class="slide-content">
+      <div class="section-badge anim-item anim-delay-1">
+        <div class="section-number">5</div>
+        <span class="label-accent">Simulador Comercial</span>
+      </div>
+
+      <h2 class="headline-large anim-item anim-delay-2" style="margin-bottom: 8px;">
+        Validación en<br><span class="gradient-text-blue">Aspen Plus</span>
+      </h2>
+
+      <p class="body-regular anim-item anim-delay-2" style="margin-bottom: 32px; max-width: 650px;">
+        Configuración rigurosa de bloques industriales con resolución simultánea de ecuaciones de estado y balances termodinámicos.
+      </p>
+
+      <div class="grid-2 anim-item anim-delay-3" style="gap: 24px;">
+        <div class="flex-col gap-16">
+          <div class="glass-card flex-col gap-16" style="padding: 24px;">
+            <div class="label">Configuración de Bloques</div>
+            <div class="flex-col gap-12">
+              <div class="flex-row gap-10" style="align-items: center;">
+                <span class="status-dot status-dot-green"></span>
+                <div style="font-size: 13px;"><strong>PUMP:</strong> P descarga = 40 bar</div>
+              </div>
+              <div class="flex-row gap-10" style="align-items: center;">
+                <span class="status-dot status-dot-solar"></span>
+                <div style="font-size: 13px;"><strong>B5 (HeatX):</strong> Shortcut, contracorriente, T<sub>hot,out</sub>=320°C, ΔT<sub>min</sub>=1°C</div>
+              </div>
+              <div class="flex-row gap-10" style="align-items: center;">
+                <span class="status-dot status-dot-green"></span>
+                <div style="font-size: 13px;"><strong>B3 (Heater):</strong> T<sub>out</sub>=350°C, ΔP=0</div>
+              </div>
+              <div class="flex-row gap-10" style="align-items: center;">
+                <span class="status-dot status-dot-blue"></span>
+                <div style="font-size: 13px;"><strong>TURBINE:</strong> Isentrópico, P<sub>desc</sub>=18 bar</div>
+              </div>
+              <div class="flex-row gap-10" style="align-items: center;">
+                <span class="status-dot status-dot-green"></span>
+                <div style="font-size: 13px;"><strong>CONDENSE:</strong> Frac. vapor = 0, ΔP=0</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card flex-col gap-8">
+            <div class="label">Corrientes de Material</div>
+            <div class="flex-col gap-6" style="font-size: 13px; color: var(--text-secondary);">
+              <div>Dowtherm-A: <span class="mono" style="color: var(--accent-solar);">10,000 kg/h</span> a 5 bar</div>
+              <div>Agua: <span class="mono" style="color: var(--accent-blue);">1,500 kg/h</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex-col gap-16">
+          <div class="glass-card flex-col gap-16" style="padding: 24px;">
+            <div class="label">Corrientes de Energía (Resultados)</div>
+            <div class="flex-col gap-12">
+              <div class="flex-row" style="justify-content: space-between; align-items: center;">
+                <div style="font-size: 14px; color: var(--text-secondary);">WFTURBIN</div>
+                <div class="mono" style="font-size: 18px; font-weight: 700; color: var(--accent-blue);">61.1814 kW</div>
+              </div>
+              <div style="height: 1px; background: var(--border-subtle);"></div>
+              <div class="flex-row" style="justify-content: space-between; align-items: center;">
+                <div style="font-size: 14px; color: var(--text-secondary);">WTPUMP</div>
+                <div class="mono" style="font-size: 18px; font-weight: 700; color: var(--accent-red);">−3.9081 kW</div>
+              </div>
+              <div style="height: 1px; background: var(--border-subtle);"></div>
+              <div class="flex-row" style="justify-content: space-between; align-items: center;">
+                <div style="font-size: 14px; font-weight: 600;">TOGRID (neto)</div>
+                <div class="mono" style="font-size: 22px; font-weight: 800; color: var(--accent-green);">57.2732 kW</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="glass-card flex-col gap-12" style="padding: 24px;">
+            <div class="label">Balance de Energía por Bloque</div>
+            <div class="flex-col gap-8">
+              <div class="flex-row" style="justify-content: space-between; font-size: 13px;">
+                <span style="color: var(--text-secondary);">Calor aportado (B3/B5)</span>
+                <span class="mono" style="color: var(--accent-solar);">895.297 kW</span>
+              </div>
+              <div class="flex-row" style="justify-content: space-between; font-size: 13px;">
+                <span style="color: var(--text-secondary);">Calor removido (Cond.)</span>
+                <span class="mono" style="color: var(--accent-teal);">838.024 kW</span>
+              </div>
+              <div class="flex-row" style="justify-content: space-between; font-size: 13px;">
+                <span style="color: var(--text-secondary);">Turbina</span>
+                <span class="mono" style="color: var(--accent-blue);">61.182 kW</span>
+              </div>
+              <div class="flex-row" style="justify-content: space-between; font-size: 13px;">
+                <span style="color: var(--text-secondary);">Bomba</span>
+                <span class="mono" style="color: var(--accent-red);">3.908 kW</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 10.1: ASPEN PLUS — FLOWSHEET
+       ═══════════════════════════════════════════ -->
+  <section class="slide" data-section="Aspen Plus">
+    <div class="glow-orb glow-blue" style="width: 500px; height: 500px; top: -200px; right: -150px; opacity: 0.12;"></div>
+    <div class="slide-content">
+      <div class="section-badge anim-item anim-delay-1">
+        <div class="section-number">5</div>
+        <span class="label-accent">Aspen Plus · Diagrama de Flujo</span>
+      </div>
+
+      <h2 class="headline-medium anim-item anim-delay-2" style="margin-bottom: 24px;">
+        Modelación del <span class="gradient-text-blue">Ciclo Rankine</span>
+      </h2>
+
+      <div class="grid-2 anim-item anim-delay-3" style="gap: 24px; align-items: center;">
+        <div class="flex-col gap-16">
+          <div class="glass-card flex-col gap-12" style="padding: 24px;">
+            <div class="label">Descripción General</div>
+            <p class="body-regular" style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
+              Representación gráfica de los equipos de proceso y corrientes de material/energía construidos en el simulador comercial.
+            </p>
+          </div>
+          <div class="card flex-col gap-8">
+            <div class="label">Equipos Clave</div>
+            <ul class="check-list" style="font-size: 13px;">
+              <li><strong>B3 (Heater):</strong> Absorbedor solar Fresnel.</li>
+              <li><strong>B6 (Flash):</strong> Acumulador térmico de HTF.</li>
+              <li><strong>B5 (HeatX):</strong> Evaporador y sobrecalentador de agua.</li>
+              <li><strong>Turbina & Bomba:</strong> Equipos rotativos del ciclo.</li>
+              <li><strong>B1 y B2:</strong> Mezclador y divisor para el trabajo neto.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="flex-col gap-16">
+          <div class="window-mockup">
+            <div class="window-header">
+              <div class="window-title">Aspen Plus V12.1 - [Main Flowsheet]</div>
+              <div class="window-buttons">
+                <span class="window-button minimize">🗕</span>
+                <span class="window-button maximize">🗖</span>
+                <span class="window-button close">🗙</span>
+              </div>
+            </div>
+            <div class="window-body">
+              <img src="assets/aspen_3.jpg" alt="Aspen Flowsheet">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 10.2: ASPEN PLUS — COMPONENTES
+       ═══════════════════════════════════════════ -->
+  <section class="slide" data-section="Aspen Plus">
+    <div class="glow-orb glow-blue" style="width: 500px; height: 500px; bottom: -200px; left: -100px; opacity: 0.1;"></div>
+    <div class="slide-content">
+      <div class="section-badge anim-item anim-delay-1">
+        <div class="section-number">5</div>
+        <span class="label-accent">Aspen Plus · Componentes</span>
+      </div>
+
+      <h2 class="headline-medium anim-item anim-delay-2" style="margin-bottom: 24px;">
+        Definición de <span class="gradient-text-blue">Sustancias</span>
+      </h2>
+
+      <div class="grid-2 anim-item anim-delay-3" style="gap: 24px; align-items: center;">
+        <div class="flex-col gap-16">
+          <div class="glass-card flex-col gap-12" style="padding: 24px;">
+            <div class="label">Química del Proceso</div>
+            <p class="body-regular" style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
+              Definición y especificación de las sustancias químicas puras que componen las fases activas del sistema en el simulador.
+            </p>
+          </div>
+          <div class="card flex-col gap-8">
+            <div class="label">Propiedades</div>
+            <ul class="check-list" style="font-size: 13px;">
+              <li><strong>WATER (H2O):</strong> Fluido del ciclo Rankine.</li>
+              <li><strong>DOWTH-01 (Dowtherm-A):</strong> Fluido caloportador bifenílico estable a altas temperaturas (hasta 400°C).</li>
+              <li>Modelados como componentes convencionales para asegurar balances rígidos.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="flex-col gap-16">
+          <div class="window-mockup">
+            <div class="window-header">
+              <div class="window-title">Aspen Plus V12.1 - [Components - Selection]</div>
+              <div class="window-buttons">
+                <span class="window-button minimize">🗕</span>
+                <span class="window-button maximize">🗖</span>
+                <span class="window-button close">🗙</span>
+              </div>
+            </div>
+            <div class="window-body">
+              <img src="assets/aspen_2.jpg" alt="Aspen Components">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 10.3: ASPEN PLUS — MÉTODOS
+       ═══════════════════════════════════════════ -->
+  <section class="slide" data-section="Aspen Plus">
+    <div class="glow-orb glow-blue" style="width: 500px; height: 500px; top: -200px; right: -150px; opacity: 0.12;"></div>
+    <div class="slide-content">
+      <div class="section-badge anim-item anim-delay-1">
+        <div class="section-number">5</div>
+        <span class="label-accent">Aspen Plus · Métodos</span>
+      </div>
+
+      <h2 class="headline-medium anim-item anim-delay-2" style="margin-bottom: 24px;">
+        Modelos de <span class="gradient-text-blue">Propiedades</span>
+      </h2>
+
+      <div class="grid-2 anim-item anim-delay-3" style="gap: 24px; align-items: center;">
+        <div class="flex-col gap-16">
+          <div class="glass-card flex-col gap-12" style="padding: 24px;">
+            <div class="label">Ecuaciones de Estado</div>
+            <p class="body-regular" style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
+              Configuración de los métodos termodinámicos que predicen el comportamiento de fases y el cálculo de entalpías.
+            </p>
+          </div>
+          <div class="card flex-col gap-8">
+            <div class="label">Configuración</div>
+            <ul class="check-list" style="font-size: 13px;">
+              <li><strong>Base Method (NRTL):</strong> Modelo Non-Random Two-Liquid para el lazo del HTF orgánico.</li>
+              <li><strong>Free-Water Method (STEAM-TA):</strong> Para el agua de proceso, asegurando la precisión de las tablas de vapor ASME.</li>
+              <li>Equilibrio líquido-vapor modelado para mezcla inmiscible.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="flex-col gap-16">
+          <div class="window-mockup">
+            <div class="window-header">
+              <div class="window-title">Aspen Plus V12.1 - [Methods - Global]</div>
+              <div class="window-buttons">
+                <span class="window-button minimize">🗕</span>
+                <span class="window-button maximize">🗖</span>
+                <span class="window-button close">🗙</span>
+              </div>
+            </div>
+            <div class="window-body">
+              <img src="assets/aspen_1.jpg" alt="Aspen Methods">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 10.4: ASPEN PLUS — BOMBA
+       ═══════════════════════════════════════════ -->
+  <section class="slide" data-section="Aspen Plus">
+    <div class="glow-orb glow-blue" style="width: 500px; height: 500px; bottom: -200px; left: -100px; opacity: 0.1;"></div>
+    <div class="slide-content">
+      <div class="section-badge anim-item anim-delay-1">
+        <div class="section-number">5</div>
+        <span class="label-accent">Aspen Plus · Bomba</span>
+      </div>
+
+      <h2 class="headline-medium anim-item anim-delay-2" style="margin-bottom: 24px;">
+        Especificaciones de <span class="gradient-text-blue">PUMP</span>
+      </h2>
+
+      <div class="grid-2 anim-item anim-delay-3" style="gap: 24px; align-items: center;">
+        <div class="flex-col gap-16">
+          <div class="glass-card flex-col gap-12" style="padding: 24px;">
+            <div class="label">Condiciones de Operación</div>
+            <p class="body-regular" style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
+              Definición de las condiciones mecánicas del impulsor de alimentación de agua hacia la caldera de alta presión.
+            </p>
+          </div>
+          <div class="card flex-col gap-8">
+            <div class="label">Parámetros</div>
+            <ul class="check-list" style="font-size: 13px;">
+              <li><strong>Modelo:</strong> Bomba centrífuga de líquido.</li>
+              <li><strong>Presión de descarga:</strong> <span class="mono" style="color: var(--accent-solar);">40 bar</span>.</li>
+              <li><strong>Objetivo:</strong> Eleva la presión de alimentación del agua para permitir la evaporación y sobrecalentamiento de alta presión.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="flex-col gap-16">
+          <div class="window-mockup">
+            <div class="window-header">
+              <div class="window-title">Aspen Plus V12.1 - [PUMP (Pump) - Specifications]</div>
+              <div class="window-buttons">
+                <span class="window-button minimize">🗕</span>
+                <span class="window-button maximize">🗖</span>
+                <span class="window-button close">🗙</span>
+              </div>
+            </div>
+            <div class="window-body">
+              <img src="assets/aspen_4.jpg" alt="Aspen Pump Specs">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 10.5: ASPEN PLUS — HEATX
+       ═══════════════════════════════════════════ -->
+  <section class="slide" data-section="Aspen Plus">
+    <div class="glow-orb glow-blue" style="width: 500px; height: 500px; top: -200px; right: -150px; opacity: 0.12;"></div>
+    <div class="slide-content">
+      <div class="section-badge anim-item anim-delay-1">
+        <div class="section-number">5</div>
+        <span class="label-accent">Aspen Plus · Intercambiador</span>
+      </div>
+
+      <h2 class="headline-medium anim-item anim-delay-2" style="margin-bottom: 24px;">
+        Generador de Vapor <span class="gradient-text-blue">B5 (HeatX)</span>
+      </h2>
+
+      <div class="grid-2 anim-item anim-delay-3" style="gap: 24px; align-items: center;">
+        <div class="flex-col gap-16">
+          <div class="glass-card flex-col gap-12" style="padding: 24px;">
+            <div class="label">Caldera / Intercambiador</div>
+            <p class="body-regular" style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
+              Acopla térmicamente el lazo de aceite térmico caliente (HTF) con el ciclo Rankine para generar vapor.
+            </p>
+          </div>
+          <div class="card flex-col gap-8">
+            <div class="label">Diseño Térmico</div>
+            <ul class="check-list" style="font-size: 13px;">
+              <li><strong>Model:</strong> Shortcut, contracorriente (`Countercurrent`).</li>
+              <li><strong>Temperatura de salida HTF:</strong> <span class="mono" style="color: var(--accent-solar);">320°C</span>.</li>
+              <li><strong>Acercamiento mínimo (ΔT_min):</strong> <span class="mono" style="color: var(--accent-blue);">1°C</span>, maximizando la eficiencia de transferencia.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="flex-col gap-16">
+          <div class="window-mockup">
+            <div class="window-header">
+              <div class="window-title">Aspen Plus V12.1 - [B5 (HeatX) - Specifications]</div>
+              <div class="window-buttons">
+                <span class="window-button minimize">🗕</span>
+                <span class="window-button maximize">🗖</span>
+                <span class="window-button close">🗙</span>
+              </div>
+            </div>
+            <div class="window-body">
+              <img src="assets/aspen_5.jpg" alt="Aspen HeatX Specs">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 10.6: ASPEN PLUS — HEATER
+       ═══════════════════════════════════════════ -->
+  <section class="slide" data-section="Aspen Plus">
+    <div class="glow-orb glow-blue" style="width: 500px; height: 500px; bottom: -200px; left: -100px; opacity: 0.1;"></div>
+    <div class="slide-content">
+      <div class="section-badge anim-item anim-delay-1">
+        <div class="section-number">5</div>
+        <span class="label-accent">Aspen Plus · Calentador</span>
+      </div>
+
+      <h2 class="headline-medium anim-item anim-delay-2" style="margin-bottom: 24px;">
+        Aporte de Calor <span class="gradient-text-blue">B3 (Heater)</span>
+      </h2>
+
+      <div class="grid-2 anim-item anim-delay-3" style="gap: 24px; align-items: center;">
+        <div class="flex-col gap-16">
+          <div class="glass-card flex-col gap-12" style="padding: 24px;">
+            <div class="label">Colector Fresnel</div>
+            <p class="body-regular" style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
+              Simula la ganancia neta de entalpía del fluido térmico HTF al pasar por el receptor lineal Fresnel expuesto al sol.
+            </p>
+          </div>
+          <div class="card flex-col gap-8">
+            <div class="label">Especificación</div>
+            <ul class="check-list" style="font-size: 13px;">
+              <li><strong>Temperatura de salida:</strong> <span class="mono" style="color: var(--accent-solar);">350°C</span>.</li>
+              <li><strong>Caída de presión (ΔP):</strong> <span class="mono" style="color: var(--text-secondary);">0 bar</span> (isobárico).</li>
+              <li><strong>Fases válidas:</strong> Vapor-Líquido (`Vapor-Liquid`).</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="flex-col gap-16">
+          <div class="window-mockup">
+            <div class="window-header">
+              <div class="window-title">Aspen Plus V12.1 - [B3 (Heater) - Specifications]</div>
+              <div class="window-buttons">
+                <span class="window-button minimize">🗕</span>
+                <span class="window-button maximize">🗖</span>
+                <span class="window-button close">🗙</span>
+              </div>
+            </div>
+            <div class="window-body">
+              <img src="assets/aspen_6.jpg" alt="Aspen Heater Specs">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 10.7: ASPEN PLUS — MIXER
+       ═══════════════════════════════════════════ -->
+  <section class="slide" data-section="Aspen Plus">
+    <div class="glow-orb glow-blue" style="width: 500px; height: 500px; top: -200px; right: -150px; opacity: 0.12;"></div>
+    <div class="slide-content">
+      <div class="section-badge anim-item anim-delay-1">
+        <div class="section-number">5</div>
+        <span class="label-accent">Aspen Plus · Vaso de Mezcla</span>
+      </div>
+
+      <h2 class="headline-medium anim-item anim-delay-2" style="margin-bottom: 24px;">
+        Expansión y Retorno <span class="gradient-text-blue">B6 (Mixer)</span>
+      </h2>
+
+      <div class="grid-2 anim-item anim-delay-3" style="gap: 24px; align-items: center;">
+        <div class="flex-col gap-16">
+          <div class="glass-card flex-col gap-12" style="padding: 24px;">
+            <div class="label">Estabilidad del Lazo</div>
+            <p class="body-regular" style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
+              Mezclador isobárico para equilibrar las corrientes de retorno de Dowtherm-A antes de reingresar al colector B3.
+            </p>
+          </div>
+          <div class="card flex-col gap-8">
+            <div class="label">Convergencia Numérica</div>
+            <ul class="check-list" style="font-size: 13px;">
+              <li><strong>Presión:</strong> <span class="mono" style="color: var(--text-secondary);">0 bar</span> de caída.</li>
+              <li><strong>Máximo de iteraciones:</strong> <span class="mono">30</span>.</li>
+              <li><strong>Tolerancia al error:</strong> <span class="mono" style="color: var(--accent-green);">0.0001</span> para convergencia de masa y energía.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="flex-col gap-16">
+          <div class="window-mockup">
+            <div class="window-header">
+              <div class="window-title">Aspen Plus V12.1 - [B6 (Mixer) - Flash Options]</div>
+              <div class="window-buttons">
+                <span class="window-button minimize">🗕</span>
+                <span class="window-button maximize">🗖</span>
+                <span class="window-button close">🗙</span>
+              </div>
+            </div>
+            <div class="window-body">
+              <img src="assets/aspen_7.jpg" alt="Aspen Mixer Specs">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 10.8: ASPEN PLUS — RESULTADOS CORRIENTES
+       ═══════════════════════════════════════════ -->
+  <section class="slide" data-section="Aspen Plus">
+    <div class="glow-orb glow-blue" style="width: 500px; height: 500px; bottom: -200px; left: -100px; opacity: 0.1;"></div>
+    <div class="slide-content">
+      <div class="section-badge anim-item anim-delay-1">
+        <div class="section-number">5</div>
+        <span class="label-accent">Aspen Plus · Resultados</span>
+      </div>
+
+      <h2 class="headline-medium anim-item anim-delay-2" style="margin-bottom: 24px;">
+        Balance General de <span class="gradient-text-blue">Corrientes</span>
+      </h2>
+
+      <div class="grid-2 anim-item anim-delay-3" style="gap: 24px; align-items: center;">
+        <div class="flex-col gap-16">
+          <div class="glass-card flex-col gap-12" style="padding: 24px;">
+            <div class="label">Material Balance</div>
+            <p class="body-regular" style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
+              Valores numéricos de masa y energía al final de la convergencia global de la simulación.
+            </p>
+          </div>
+          <div class="card flex-col gap-8">
+            <div class="label">Métricas Clave</div>
+            <ul class="check-list" style="font-size: 13px;">
+              <li><strong>Flujo Rankine (Agua):</strong> <span class="mono" style="color: var(--accent-blue);">1,500 kg/h</span>.</li>
+              <li><strong>Flujo Solar (HTF):</strong> <span class="mono" style="color: var(--accent-solar);">10,000 kg/h</span>.</li>
+              <li><strong>Vapor Vivo (S2):</strong> <span class="mono">332.8°C</span> a <span class="mono">40 bar</span>.</li>
+              <li><strong>Salida Turbina (1):</strong> <span class="mono">259.3°C</span> a <span class="mono">18 bar</span>.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="flex-col gap-16">
+          <div class="window-mockup">
+            <div class="window-header">
+              <div class="window-title">Aspen Plus V12.1 - [Results Summary - Streams (All)]</div>
+              <div class="window-buttons">
+                <span class="window-button minimize">🗕</span>
+                <span class="window-button maximize">🗖</span>
+                <span class="window-button close">🗙</span>
+              </div>
+            </div>
+            <div class="window-body">
+              <img src="assets/aspen_8.jpg" alt="Aspen Stream Results">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 10.9: ASPEN PLUS — RESULTADOS POTENCIA
+       ═══════════════════════════════════════════ -->
+  <section class="slide" data-section="Aspen Plus">
+    <div class="glow-orb glow-blue" style="width: 500px; height: 500px; top: -200px; right: -150px; opacity: 0.12;"></div>
+    <div class="slide-content">
+      <div class="section-badge anim-item anim-delay-1">
+        <div class="section-number">5</div>
+        <span class="label-accent">Aspen Plus · Balances</span>
+      </div>
+
+      <h2 class="headline-medium anim-item anim-delay-2" style="margin-bottom: 24px;">
+        Potencia y Trabajo <span class="gradient-text-blue">Neto (TOGRID)</span>
+      </h2>
+
+      <div class="grid-2 anim-item anim-delay-3" style="gap: 24px; align-items: center;">
+        <div class="flex-col gap-16">
+          <div class="glass-card flex-col gap-12" style="padding: 24px;">
+            <div class="label">Cálculo de Potencia</div>
+            <p class="body-regular" style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
+              Balances de energía mecánicos del ciclo para el cálculo del trabajo entregado a la red de distribución.
+            </p>
+          </div>
+          <div class="card flex-col gap-8">
+            <div class="label">Trabajo Calculado</div>
+            <ul class="check-list" style="font-size: 13px;">
+              <li><strong>Turbina (WFTURBIN):</strong> <span class="mono" style="color: var(--accent-blue);">61.18 kW</span> generados.</li>
+              <li><strong>Bomba (WTPUMP):</strong> <span class="mono" style="color: var(--accent-red);">-3.91 kW</span> consumidos.</li>
+              <li><strong>Trabajo Neto (TOGRID):</strong> <span class="mono" style="color: var(--accent-green);">57.27 kW</span> netos.</li>
+              <li>Validado con una desviación menor al <strong>0.03%</strong> frente a nuestro simulador web.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="flex-col gap-16">
+          <div class="window-mockup">
+            <div class="window-header">
+              <div class="window-title">Aspen Plus V12.1 - [Results Summary - Streams (Work)]</div>
+              <div class="window-buttons">
+                <span class="window-button minimize">🗕</span>
+                <span class="window-button maximize">🗖</span>
+                <span class="window-button close">🗙</span>
+              </div>
+            </div>
+            <div class="window-body">
+              <img src="assets/aspen_9.jpg" alt="Aspen Work Results">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 11: RESULTADOS — KPIs PRINCIPALES
+       ═══════════════════════════════════════════ -->
+  <section class="slide" data-section="Resultados">
+    <div class="glow-orb glow-solar" style="width: 400px; height: 400px; bottom: -150px; left: 50%; transform: translateX(-50%); opacity: 0.1;"></div>
+    <div class="slide-content text-center">
+      <div class="section-badge anim-item anim-delay-1" style="justify-content: center;">
+        <div class="section-number">6</div>
+        <span class="label-accent">Resultados</span>
+      </div>
+
+      <h2 class="headline-large anim-item anim-delay-2" style="margin-bottom: 48px;">
+        Métricas Clave
+      </h2>
+
+      <div class="grid-4 anim-item anim-delay-3" style="margin-bottom: 40px;">
+        <div class="glass-card flex-col gap-8 text-center" style="padding: 24px;">
+          <div class="metric-value gradient-text" id="metric-power">57.27</div>
+          <div class="metric-unit">kW</div>
+          <div class="metric-label">Trabajo Neto</div>
+        </div>
+        <div class="glass-card flex-col gap-8 text-center" style="padding: 24px;">
+          <div class="metric-value" style="color: var(--accent-blue);" id="metric-turbine">61.18</div>
+          <div class="metric-unit">kW</div>
+          <div class="metric-label">Potencia Turbina</div>
+        </div>
+        <div class="glass-card flex-col gap-8 text-center" style="padding: 24px;">
+          <div class="metric-value" style="color: var(--accent-green);" id="metric-efficiency">9.5</div>
+          <div class="metric-unit">%</div>
+          <div class="metric-label">Eficiencia Máxima</div>
+        </div>
+        <div class="glass-card flex-col gap-8 text-center" style="padding: 24px;">
+          <div class="metric-value" style="color: var(--accent-teal);" id="metric-heat">895</div>
+          <div class="metric-unit">kW</div>
+          <div class="metric-label">Calor Aportado</div>
+        </div>
+      </div>
+
+      <div class="anim-item anim-delay-4" style="max-width: 800px; margin: 0 auto;">
+        <div class="energy-flow">
+          <div class="energy-bar-wrapper">
+            <div class="energy-bar-label">Q Solar (B3/B5)</div>
+            <div class="energy-bar-track">
+              <div class="energy-bar-fill" style="width: 100%; background: linear-gradient(90deg, #f0a500, #ff6b35);" id="bar-solar">895 kW</div>
+            </div>
+          </div>
+          <div class="energy-bar-wrapper">
+            <div class="energy-bar-label">Q Rechazado (Cond.)</div>
+            <div class="energy-bar-track">
+              <div class="energy-bar-fill" style="width: 93.6%; background: linear-gradient(90deg, #64d2ff, #2997ff);" id="bar-cond">838 kW</div>
+            </div>
+          </div>
+          <div class="energy-bar-wrapper">
+            <div class="energy-bar-label">W Turbina</div>
+            <div class="energy-bar-track">
+              <div class="energy-bar-fill" style="width: 6.8%; background: linear-gradient(90deg, #2997ff, #5856d6);" id="bar-turb">61.18 kW</div>
+            </div>
+          </div>
+          <div class="energy-bar-wrapper">
+            <div class="energy-bar-label">W Neto (TOGRID)</div>
+            <div class="energy-bar-track">
+              <div class="energy-bar-fill" style="width: 6.4%; background: linear-gradient(90deg, #30d158, #34c759);" id="bar-net">57.27 kW</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 12: COMPARATIVA
+       ═══════════════════════════════════════════ -->
+  <section class="slide" data-section="Resultados">
+    <div class="slide-content">
+      <div class="section-badge anim-item anim-delay-1">
+        <div class="section-number">6</div>
+        <span class="label-accent">Comparativa</span>
+      </div>
+
+      <h2 class="headline-medium anim-item anim-delay-2" style="margin-bottom: 32px;">
+        Simulador Web <span style="color: var(--text-tertiary);">vs</span> <span class="gradient-text-blue">Aspen Plus</span>
+      </h2>
+
+      <div class="anim-item anim-delay-3" style="margin-bottom: 32px;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Parámetro</th>
+              <th>Simulador Web</th>
+              <th>Aspen Plus</th>
+              <th>Diferencia</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="font-weight: 500; color: var(--text-primary);">W Turbina</td>
+              <td class="mono-val">61.18 kW</td>
+              <td class="mono-val">61.1814 kW</td>
+              <td class="mono-val" style="color: var(--accent-green);">≈ 0%</td>
+            </tr>
+            <tr>
+              <td style="font-weight: 500; color: var(--text-primary);">W Bomba</td>
+              <td class="mono-val">3.91 kW</td>
+              <td class="mono-val">3.9081 kW</td>
+              <td class="mono-val" style="color: var(--accent-green);">≈ 0%</td>
+            </tr>
+            <tr>
+              <td style="font-weight: 500; color: var(--text-primary);">W Neto</td>
+              <td class="mono-val" style="color: var(--accent-solar);">57.27 kW</td>
+              <td class="mono-val" style="color: var(--accent-blue);">57.2732 kW</td>
+              <td class="mono-val" style="color: var(--accent-green);">≈ 0%</td>
+            </tr>
+            <tr>
+              <td style="font-weight: 500; color: var(--text-primary);">Calor Aportado</td>
+              <td class="mono-val">895 kW</td>
+              <td class="mono-val">895.297 kW</td>
+              <td class="mono-val" style="color: var(--accent-green);">0.03%</td>
+            </tr>
+            <tr>
+              <td style="font-weight: 500; color: var(--text-primary);">Calor Rechazado</td>
+              <td class="mono-val">838 kW</td>
+              <td class="mono-val">838.024 kW</td>
+              <td class="mono-val" style="color: var(--accent-green);">≈ 0%</td>
+            </tr>
+            <tr>
+              <td style="font-weight: 500; color: var(--text-primary);">Eficiencia</td>
+              <td class="mono-val">6.4 – 9.5%</td>
+              <td class="mono-val">6.4 – 9.5%</td>
+              <td class="mono-val" style="color: var(--accent-green);">Consistente</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="compare-grid anim-item anim-delay-4">
+        <div class="card flex-col gap-12" style="border-left: 3px solid var(--accent-solar);">
+          <div class="flex-row gap-8" style="align-items: center;">
+            <span style="font-size: 20px;">☀️</span>
+            <div class="headline-small" style="font-size: 16px;">Simulador Web</div>
+          </div>
+          <ul class="check-list" style="font-size: 12px;">
+            <li>Interactivo: ajustes en tiempo real (&lt;100ms)</li>
+            <li>Visualización 3D del campo solar</li>
+            <li>Análisis de sensibilidad integrado</li>
+            <li>Módulo educativo con explicaciones</li>
+            <li>Accesible desde cualquier navegador</li>
+            <li>Gratuito y de código abierto</li>
+          </ul>
+        </div>
+
+        <div class="card flex-col gap-12" style="border-left: 3px solid var(--accent-blue);">
+          <div class="flex-row gap-8" style="align-items: center;">
+            <span style="font-size: 20px;">⚙️</span>
+            <div class="headline-small" style="font-size: 16px;">Aspen Plus</div>
+          </div>
+          <ul class="check-list" style="font-size: 12px;">
+            <li>Base de datos termodinámica exhaustiva</li>
+            <li>Resolución rigurosa de ecuaciones de estado</li>
+            <li>Validación industrial reconocida</li>
+            <li>Análisis multicomponente avanzado</li>
+            <li>Integración con diseño de procesos</li>
+            <li>Estándar en ingeniería profesional</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 13: ANÁLISIS DE EFICIENCIA
+       ═══════════════════════════════════════════ -->
+  <section class="slide" data-section="Resultados">
+    <div class="slide-content">
+      <div class="section-badge anim-item anim-delay-1">
+        <div class="section-number">6</div>
+        <span class="label-accent">Análisis Termodinámico</span>
+      </div>
+
+      <h2 class="headline-medium anim-item anim-delay-2" style="margin-bottom: 32px;">
+        ¿Por qué <span class="gradient-text">9.5%</span> de eficiencia?
+      </h2>
+
+      <div class="grid-2 anim-item anim-delay-3" style="gap: 32px;">
+        <div class="flex-col gap-20" style="justify-content: center;">
+          <div class="efficiency-ring" style="margin: 0 auto;">
+            <div class="efficiency-ring-inner">
+              <div class="metric-value" style="font-size: 36px; color: var(--accent-solar);">9.5%</div>
+              <div style="font-size: 11px; color: var(--text-tertiary); margin-top: 4px;">Eficiencia máx.</div>
+            </div>
+          </div>
+
+          <div class="card-accent" style="padding: 16px;">
+            <p class="body-regular" style="font-size: 13px; text-align: center;">
+              De <strong style="color: var(--accent-solar);">895 kW</strong> térmicos, solo <strong style="color: var(--accent-green);">57.27 kW</strong> se convierten en electricidad. El condensador rechaza <strong style="color: var(--accent-teal);">838 kW</strong> a &gt;200°C.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex-col gap-16">
+          <div class="card flex-col gap-12">
+            <div class="flex-row gap-10" style="align-items: center;">
+              <div class="icon-circle icon-circle-red" style="width: 36px; height: 36px; font-size: 16px;">📉</div>
+              <div class="headline-small" style="font-size: 15px;">Salto Entálpico Corto</div>
+            </div>
+            <p class="body-regular" style="font-size: 13px;">Al expandir solo de 40 a 18 bar, el salto entálpico es pequeño. La energía "útil" del vapor no se aprovecha completamente.</p>
+          </div>
+
+          <div class="card flex-col gap-12">
+            <div class="flex-row gap-10" style="align-items: center;">
+              <div class="icon-circle icon-circle-solar" style="width: 36px; height: 36px; font-size: 16px;">🌡️</div>
+              <div class="headline-small" style="font-size: 15px;">Temperatura de Rechazo Elevada</div>
+            </div>
+            <p class="body-regular" style="font-size: 13px;">El vapor sale de la turbina a 259°C (aún con alta entalpía). El condensador disipa 838 kW a T<sub>sat</sub> ≈ 207°C, energía térmicamente valiosa.</p>
+          </div>
+
+          <div class="card flex-col gap-12">
+            <div class="flex-row gap-10" style="align-items: center;">
+              <div class="icon-circle icon-circle-blue" style="width: 36px; height: 36px; font-size: 16px;">⚠️</div>
+              <div class="headline-small" style="font-size: 15px;">Restricción de Diseño: 18 bar</div>
+            </div>
+            <p class="body-regular" style="font-size: 13px;">Obligatoria para evitar condensación en la turbina. A menor presión, el vapor cruza la línea de saturación → erosión destructiva de álabes.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 14: FUTURAS MEJORAS
+       ═══════════════════════════════════════════ -->
+  <section class="slide" data-section="Resultados">
+    <div class="slide-content">
+      <div class="section-badge anim-item anim-delay-1">
+        <div class="section-number">6</div>
+        <span class="label-accent">Propuestas de Mejora</span>
+      </div>
+
+      <h2 class="headline-medium anim-item anim-delay-2" style="margin-bottom: 36px;">
+        Oportunidades de<br><span class="gradient-text">Optimización</span>
+      </h2>
+
+      <div class="grid-3 anim-item anim-delay-3" style="gap: 20px;">
+        <div class="glass-card flex-col gap-16" style="border-top: 3px solid var(--accent-solar);">
+          <div style="font-size: 32px; text-align: center;">⬇️</div>
+          <h3 class="headline-small text-center" style="font-size: 18px;">Expansión a Vacío</h3>
+          <p class="body-regular" style="font-size: 13px;">
+            Expandir el vapor hasta presiones de vacío (0.05 – 0.1 bar) sin alcanzar el punto de rocío. Multiplicaría significativamente el trabajo mecánico neto.
+          </p>
+          <div class="pill pill-solar" style="width: fit-content; margin: 0 auto;">Alto impacto</div>
+        </div>
+
+        <div class="glass-card flex-col gap-16" style="border-top: 3px solid var(--accent-blue);">
+          <div style="font-size: 32px; text-align: center;">🔄</div>
+          <h3 class="headline-small text-center" style="font-size: 18px;">Recalentamiento</h3>
+          <p class="body-regular" style="font-size: 13px;">
+            Regresar el vapor parcialmente expandido al intercambiador B5 para elevar su temperatura. Evita humedad en álabes, permite expandir a menor presión.
+          </p>
+          <div class="pill pill-blue" style="width: fit-content; margin: 0 auto;">Medio impacto</div>
+        </div>
+
+        <div class="glass-card flex-col gap-16" style="border-top: 3px solid var(--accent-green);">
+          <div style="font-size: 32px; text-align: center;">♻️</div>
+          <h3 class="headline-small text-center" style="font-size: 18px;">Cogeneración</h3>
+          <p class="body-regular" style="font-size: 13px;">
+            Aprovechar los 838 kW del condensador a &gt;200°C para procesos industriales, desalinización o absorción térmica. Eficiencia global &gt;70%.
+          </p>
+          <div class="pill pill-green" style="width: fit-content; margin: 0 auto;">Alternativa viable</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE: BENTO GRID SUMMARY (Apple Keynote style)
+       ═══════════════════════════════════════════ -->
+  <section class="slide" data-section="Resumen">
+    <div style="position: absolute; inset: 0; overflow: hidden;">
+      <div class="glow-orb glow-solar" style="width: 500px; height: 500px; top: -200px; left: -100px; opacity: 0.1;"></div>
+      <div class="glow-orb glow-blue" style="width: 400px; height: 400px; bottom: -150px; right: -100px; opacity: 0.08;"></div>
+    </div>
+
+    <div class="bento-grid" style="position: relative; z-index: 1;">
+
+      <!-- ROW 1 ────────────────────────────────────── -->
+
+      <!-- Cell 1: Big Net Power (span 2 cols) -->
+      <div class="bento-cell bento-solar bento-bg-1" style="grid-column: span 2; grid-row: span 2; justify-content: center; align-items: center; text-align: center;">
+        <div class="bento-icon" style="font-size: 40px;">⚡</div>
+        <div class="bento-metric-lg gradient-text" style="font-size: 72px;">57.27</div>
+        <div style="font-size: 18px; font-weight: 600; color: var(--accent-solar); margin-top: 2px;">kW neto</div>
+        <div class="bento-subtitle">Trabajo eléctrico neto entregado a la red (TOGRID)</div>
+      </div>
+
+      <!-- Cell 2: Turbine Power -->
+      <div class="bento-cell bento-blue bento-bg-2">
+        <div class="bento-icon-sm">🔄</div>
+        <div class="bento-metric" style="color: var(--accent-blue);">61.18</div>
+        <div style="font-size: 11px; color: var(--accent-blue); font-weight: 600;">kW</div>
+        <div class="bento-subtitle">Potencia turbina</div>
+      </div>
+
+      <!-- Cell 3: Pump consumption -->
+      <div class="bento-cell bento-dark bento-bg-3">
+        <div class="bento-icon-sm">💧</div>
+        <div class="bento-metric" style="color: var(--accent-red); font-size: 38px;">3.91</div>
+        <div style="font-size: 11px; color: var(--accent-red); font-weight: 600;">kW</div>
+        <div class="bento-subtitle">Consumo bomba</div>
+      </div>
+
+      <!-- Cell 4: Efficiency ring (span 2 cols) -->
+      <div class="bento-cell bento-dark bento-bg-4" style="grid-column: span 2; grid-row: span 2; justify-content: center; align-items: center; text-align: center;">
+        <div class="bento-ring" style="background: conic-gradient(var(--accent-solar) 0deg, var(--accent-solar) 34.2deg, rgba(255,255,255,0.06) 34.2deg); width: 110px; height: 110px;">
+          <div class="bento-ring-inner" style="background: #111; width: 88px; height: 88px;">
+            <div style="font-size: 30px; font-weight: 800; color: var(--accent-solar);">9.5%</div>
+          </div>
+        </div>
+        <div class="bento-title" style="margin-top: 8px;">Eficiencia Térmica</div>
+        <div class="bento-subtitle">Rango: 6.4% – 9.5%<br>Limitado por descarga a 18 bar</div>
+      </div>
+
+      <!-- ROW 2 (continuation) ───────────────────── -->
+
+      <!-- Cell 5: Heat Input -->
+      <div class="bento-cell bento-solar bento-bg-5" style="justify-content: flex-start;">
+        <div style="font-size: 14px; margin-bottom: 4px;">🔥</div>
+        <div style="font-size: 32px; font-weight: 800; color: var(--accent-solar);">895</div>
+        <div style="font-size: 11px; font-weight: 600; color: rgba(240,165,0,0.7);">kW entrada</div>
+        <div class="bento-bar"><div class="bento-bar-fill" style="width: 100%; background: var(--gradient-solar);"></div></div>
+      </div>
+
+      <!-- Cell 6: Heat Rejected -->
+      <div class="bento-cell bento-blue bento-bg-6">
+        <div style="font-size: 14px; margin-bottom: 4px;">🌊</div>
+        <div style="font-size: 32px; font-weight: 800; color: var(--accent-teal);">838</div>
+        <div style="font-size: 11px; font-weight: 600; color: rgba(100,210,255,0.7);">kW rechazado</div>
+        <div class="bento-bar"><div class="bento-bar-fill" style="width: 93.6%; background: linear-gradient(90deg, #64d2ff, #2997ff);"></div></div>
+      </div>
+
+      <!-- ROW 3 ────────────────────────────────────── -->
+
+      <!-- Cell 7: Dowtherm-A (span 2 cols) -->
+      <div class="bento-cell bento-purple bento-bg-7" style="grid-column: span 2;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="font-size: 30px;">🧪</div>
+          <div>
+            <div class="bento-title">Dowtherm-A</div>
+            <div class="bento-subtitle" style="margin-top: 2px;">HTF caloportador · Estable hasta 400°C · Baja presión</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cell 8: Pressures -->
+      <div class="bento-cell bento-dark bento-bg-8" style="align-items: center; justify-content: center; text-align: center;">
+        <div style="display: flex; align-items: baseline; gap: 4px;">
+          <span style="font-size: 36px; font-weight: 800; color: var(--text-primary);">40</span>
+          <span style="font-size: 14px; color: var(--text-tertiary);">→</span>
+          <span style="font-size: 36px; font-weight: 800; color: var(--accent-red);">18</span>
+        </div>
+        <div style="font-size: 12px; font-weight: 600; color: var(--text-tertiary); margin-top: 2px;">bar</div>
+        <div class="bento-subtitle">Expansión turbina</div>
+      </div>
+
+      <!-- Cell 9: NRTL + STEAM-TA -->
+      <div class="bento-cell bento-dark bento-bg-9">
+        <div class="bento-title" style="font-size: 17px;"><span style="color: var(--accent-green);">NRTL</span></div>
+        <div style="font-size: 11px; color: var(--text-tertiary); margin: 2px 0;">+</div>
+        <div class="bento-title" style="font-size: 17px;"><span style="color: var(--accent-blue);">STEAM-TA</span></div>
+        <div class="bento-subtitle">Métodos termodinámicos</div>
+      </div>
+
+      <!-- Cell 10: Validation badge (span 2 cols) -->
+      <div class="bento-cell bento-gradient-solar bento-bg-10" style="grid-column: span 2; align-items: center; justify-content: center; text-align: center;">
+        <div style="font-size: 28px; margin-bottom: 4px;">✅</div>
+        <div class="bento-title-lg" style="color: #000; font-size: 24px;">Validado</div>
+        <div style="font-size: 12px; font-weight: 600; color: rgba(0,0,0,0.6);">Error ≈ 0% vs Aspen Plus</div>
+      </div>
+
+      <!-- ROW 4 ────────────────────────────────────── -->
+
+      <!-- Cell 11: Simulator Web -->
+      <div class="bento-cell bento-dark bento-bg-11" style="grid-column: span 2;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="font-size: 28px;">☀️</div>
+          <div>
+            <div class="bento-title">Simulador Web</div>
+            <div class="bento-subtitle" style="margin-top: 2px;">Next.js · Three.js · TypeScript · Tiempo real</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cell 12: Aspen Plus -->
+      <div class="bento-cell bento-dark bento-bg-12" style="grid-column: span 2;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="font-size: 28px;">⚙️</div>
+          <div>
+            <div class="bento-title">Aspen Plus</div>
+            <div class="bento-subtitle" style="margin-top: 2px;">Simulador comercial · Validación industrial</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cell 13: Future - Vacuum -->
+      <div class="bento-cell bento-green bento-bg-13">
+        <div style="font-size: 16px;">⬇️</div>
+        <div class="bento-title" style="font-size: 15px;">Vacío</div>
+        <div class="bento-subtitle">Expansión 0.05 bar</div>
+      </div>
+
+      <!-- Cell 14: Future - Cogen -->
+      <div class="bento-cell bento-green bento-bg-14">
+        <div style="font-size: 16px;">♻️</div>
+        <div class="bento-title" style="font-size: 15px;">Cogen.</div>
+        <div class="bento-subtitle">η global &gt;70%</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 16: CONCLUSIONES
+       ═══════════════════════════════════════════ -->
+  <section class="slide" data-section="Conclusiones">
+    <div class="glow-orb glow-solar" style="width: 500px; height: 500px; bottom: -200px; right: -150px; opacity: 0.1;"></div>
+    <div class="slide-content">
+      <div class="section-badge anim-item anim-delay-1">
+        <div class="section-number">7</div>
+        <span class="label-accent">Conclusiones</span>
+      </div>
+
+      <h2 class="headline-large anim-item anim-delay-2" style="margin-bottom: 40px;">
+        Conclusiones
+      </h2>
+
+      <div class="flex-col gap-20">
+        <div class="flex-row gap-20 anim-item anim-delay-3">
+          <div class="icon-circle icon-circle-green" style="width: 52px; height: 52px; font-size: 24px;">✅</div>
+          <div class="flex-col gap-6" style="flex: 1;">
+            <h3 class="headline-small" style="font-size: 18px;">Modelo Validado</h3>
+            <p class="body-regular" style="font-size: 14px;">Balances de masa y energía verificados. El simulador web reproduce fielmente los resultados de Aspen Plus con diferencias &lt;0.03%. Trabajo neto: <strong style="color: var(--accent-solar);">57.27 kW</strong>.</p>
+          </div>
+        </div>
+
+        <div class="flex-row gap-20 anim-item anim-delay-4">
+          <div class="icon-circle icon-circle-solar" style="width: 52px; height: 52px; font-size: 24px;">🔥</div>
+          <div class="flex-col gap-6" style="flex: 1;">
+            <h3 class="headline-small" style="font-size: 18px;">Dowtherm-A como HTF</h3>
+            <p class="body-regular" style="font-size: 14px;">El aceite térmico cumple su función de transferir la carga calorífica sin requerir presiones extremas en el lazo primario, validando su selección frente al uso directo de agua.</p>
+          </div>
+        </div>
+
+        <div class="flex-row gap-20 anim-item anim-delay-5">
+          <div class="icon-circle icon-circle-blue" style="width: 52px; height: 52px; font-size: 24px;">📊</div>
+          <div class="flex-col gap-6" style="flex: 1;">
+            <h3 class="headline-small" style="font-size: 18px;">Eficiencia: 6.4% — 9.5%</h3>
+            <p class="body-regular" style="font-size: 14px;">La contrapresión a 18 bar limita la eficiencia eléctrica, pero es una restricción de diseño obligatoria (Segunda Ley de la Termodinámica). Amplio margen de mejora con sobrecalentamiento y vacío.</p>
+          </div>
+        </div>
+
+        <div class="flex-row gap-20 anim-item anim-delay-6">
+          <div class="icon-circle icon-circle-purple" style="width: 52px; height: 52px; font-size: 24px;">🚀</div>
+          <div class="flex-col gap-6" style="flex: 1;">
+            <h3 class="headline-small" style="font-size: 18px;">Simulador Web como Herramienta</h3>
+            <p class="body-regular" style="font-size: 14px;">El simulador interactivo demuestra que herramientas web de código abierto pueden complementar simuladores comerciales, ofreciendo accesibilidad y valor educativo sin costo de licencia.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 16: RÚBRICA DE CALIFICACIÓN
+       ═══════════════════════════════════════════ -->
+  <section class="slide" data-section="Rúbrica">
+    <div class="slide-content-wide">
+      <div class="section-badge anim-item anim-delay-1">
+        <span class="label-accent">📋 Rúbrica de Evaluación</span>
+      </div>
+
+      <h2 class="headline-medium anim-item anim-delay-2" style="margin-bottom: 24px;">
+        Criterios de Calificación
+      </h2>
+
+      <div class="slide-scroll anim-item anim-delay-3">
+        <div class="label" style="margin-bottom: 12px; color: var(--accent-solar);">Presentación</div>
+        <div class="rubric-grid" style="margin-bottom: 24px;">
+          <div class="rubric-cell rubric-header" style="text-align: left;">Criterio</div>
+          <div class="rubric-cell rubric-header">Excelente</div>
+          <div class="rubric-cell rubric-header">Bueno</div>
+          <div class="rubric-cell rubric-header">Regular</div>
+          <div class="rubric-cell rubric-header">Sin evidencia</div>
+
+          <div class="rubric-cell rubric-criteria">Contiene las secciones pedidas: intro, diagrama, caso de estudio, demo, simulación comercial, resultados, conclusiones</div>
+          <div class="rubric-cell rubric-level" style="color: var(--accent-green);">Todas las secciones completas y bien estructuradas</div>
+          <div class="rubric-cell rubric-level">Mayoría de secciones presentes</div>
+          <div class="rubric-cell rubric-level">Faltan secciones relevantes</div>
+          <div class="rubric-cell rubric-level" style="color: var(--accent-red);">No se incluyen</div>
+
+          <div class="rubric-cell rubric-criteria">Ideas expresadas de manera ordenada, clara y con lógica evidente</div>
+          <div class="rubric-cell rubric-level" style="color: var(--accent-green);">Exposición fluida y bien argumentada</div>
+          <div class="rubric-cell rubric-level">Claridad aceptable</div>
+          <div class="rubric-cell rubric-level">Desorganizada o confusa</div>
+          <div class="rubric-cell rubric-level" style="color: var(--accent-red);">No se evidencia</div>
+
+          <div class="rubric-cell rubric-criteria">Explicación coherente y lógica de ambas simulaciones y resultados</div>
+          <div class="rubric-cell rubric-level" style="color: var(--accent-green);">Comparativa clara y sustentada</div>
+          <div class="rubric-cell rubric-level">Explicación parcial</div>
+          <div class="rubric-cell rubric-level">Superficial o incompleta</div>
+          <div class="rubric-cell rubric-level" style="color: var(--accent-red);">No se incluye</div>
+
+          <div class="rubric-cell rubric-criteria">Distribución equitativa de la presentación entre los miembros del equipo</div>
+          <div class="rubric-cell rubric-level" style="color: var(--accent-green);">Participación equilibrada</div>
+          <div class="rubric-cell rubric-level">Ligera desigualdad</div>
+          <div class="rubric-cell rubric-level">Muy desigual</div>
+          <div class="rubric-cell rubric-level" style="color: var(--accent-red);">Un solo expositor</div>
+        </div>
+
+        <div class="label" style="margin-bottom: 12px; color: var(--accent-blue);">Reporte</div>
+        <div class="rubric-grid">
+          <div class="rubric-cell rubric-header" style="text-align: left;">Criterio</div>
+          <div class="rubric-cell rubric-header">Excelente</div>
+          <div class="rubric-cell rubric-header">Bueno</div>
+          <div class="rubric-cell rubric-header">Regular</div>
+          <div class="rubric-cell rubric-header">Sin evidencia</div>
+
+          <div class="rubric-cell rubric-criteria">Contiene las secciones: intro, diagrama de flujo, caso de estudio, simulador construido y comercial, resultados, conclusiones</div>
+          <div class="rubric-cell rubric-level" style="color: var(--accent-green);">Completo y detallado</div>
+          <div class="rubric-cell rubric-level">Mayoría de secciones</div>
+          <div class="rubric-cell rubric-level">Faltan secciones</div>
+          <div class="rubric-cell rubric-level" style="color: var(--accent-red);">No se incluyen</div>
+
+          <div class="rubric-cell rubric-criteria">Ideas escritas de manera ordenada, clara y con lógica evidente</div>
+          <div class="rubric-cell rubric-level" style="color: var(--accent-green);">Redacción clara y lógica</div>
+          <div class="rubric-cell rubric-level">Aceptable</div>
+          <div class="rubric-cell rubric-level">Confusa</div>
+          <div class="rubric-cell rubric-level" style="color: var(--accent-red);">No se evidencia</div>
+
+          <div class="rubric-cell rubric-criteria">Resultados presentados y explicados de manera lógica, clara y ordenada</div>
+          <div class="rubric-cell rubric-level" style="color: var(--accent-green);">Análisis completo y sustentado</div>
+          <div class="rubric-cell rubric-level">Parcialmente explicados</div>
+          <div class="rubric-cell rubric-level">Superficiales</div>
+          <div class="rubric-cell rubric-level" style="color: var(--accent-red);">No se incluyen</div>
+
+          <div class="rubric-cell rubric-criteria">Fuentes de información usando estilo APA</div>
+          <div class="rubric-cell rubric-level" style="color: var(--accent-green);">APA correcto y completo</div>
+          <div class="rubric-cell rubric-level">APA con errores menores</div>
+          <div class="rubric-cell rubric-level">Sin formato APA</div>
+          <div class="rubric-cell rubric-level" style="color: var(--accent-red);">Sin fuentes</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 17: CIERRE
+       ═══════════════════════════════════════════ -->
+  <section class="slide" data-section="Cierre">
+    <div class="title-bg">
+      <div class="title-lines"></div>
+      <div class="glow-orb glow-solar" style="width: 700px; height: 700px; top: -300px; left: 50%; transform: translateX(-50%); animation: pulse-glow 4s ease-in-out infinite;"></div>
+    </div>
+
+    <div class="slide-content flex-col gap-32 text-center" style="align-items: center; position: relative; z-index: 1;">
+      <div class="anim-item anim-delay-1">
+        <div class="label-accent" style="margin-bottom: 16px;">Ingeniería de Procesos</div>
+      </div>
+
+      <h1 class="headline-hero anim-item anim-delay-2" style="font-size: clamp(40px, 6vw, 80px);">
+        Gracias por su<br><span class="gradient-text">atención</span>
+      </h1>
+
+      <p class="body-large anim-item anim-delay-3" style="max-width: 600px;">
+        Simulación de sistema de generación eléctrica con ciclo Rankine solar. Comparativa entre simulador web interactivo y Aspen Plus.
+      </p>
+
+      <div class="flex-row gap-24 anim-item anim-delay-4" style="margin-top: 8px;">
+        <div class="flex-col gap-4 text-center">
+          <div class="metric-value gradient-text" style="font-size: 36px;">57.27</div>
+          <div class="label">kW Neto</div>
+        </div>
+        <div style="width: 1px; height: 60px; background: var(--border-subtle);"></div>
+        <div class="flex-col gap-4 text-center">
+          <div class="metric-value" style="font-size: 36px; color: var(--accent-green);">9.5%</div>
+          <div class="label">Eficiencia</div>
+        </div>
+        <div style="width: 1px; height: 60px; background: var(--border-subtle);"></div>
+        <div class="flex-col gap-4 text-center">
+          <div class="metric-value" style="font-size: 36px; color: var(--accent-blue);">≈0%</div>
+          <div class="label">Error</div>
+        </div>
+      </div>
+
+      <div class="anim-item anim-delay-5" style="margin-top: 16px;">
+        <span class="pill pill-solar" style="font-size: 14px; padding: 8px 20px;">¿Preguntas?</span>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- ═══════════════════════════════════════════
+     NAVIGATION BAR
+     ═══════════════════════════════════════════ -->
+<nav class="nav-bar" role="navigation" aria-label="Navegación de diapositivas">
+  <div class="nav-section" id="nav-section">Inicio</div>
+  <div class="nav-progress" id="nav-dots"></div>
+  <div class="flex-row gap-12" style="align-items: center;">
+    <div class="nav-counter" id="nav-counter">1 / 17</div>
+    <div class="nav-controls">
+      <button class="nav-btn" id="btn-prev" aria-label="Diapositiva anterior">←</button>
+      <button class="nav-btn" id="btn-next" aria-label="Diapositiva siguiente">→</button>
+    </div>
+  </div>
+</nav>
+
+<!-- Keyboard hint -->
+<div class="kbd-hint" id="kbd-hint">
+  <kbd>←</kbd><kbd>→</kbd> navegar &nbsp;·&nbsp; <kbd>F</kbd> pantalla completa
+</div>
+
+<script>
+  (() => {
+    const slides = document.querySelectorAll('.slide');
+    const navDots = document.getElementById('nav-dots');
+    const navSection = document.getElementById('nav-section');
+    const navCounter = document.getElementById('nav-counter');
+    const btnPrev = document.getElementById('btn-prev');
+    const btnNext = document.getElementById('btn-next');
+    const kbdHint = document.getElementById('kbd-hint');
+
+    let current = 0;
+    let isTransitioning = false;
+    const total = slides.length;
+    const visited = new Set([0]);
+
+    // Create dots
+    for (let i = 0; i < total; i++) {
+      const dot = document.createElement('div');
+      dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+      dot.dataset.index = i;
+      dot.addEventListener('click', () => goTo(i));
+      dot.setAttribute('role', 'button');
+      dot.setAttribute('aria-label', `Ir a diapositiva ${i + 1}`);
+      navDots.appendChild(dot);
+    }
+
+    function goTo(index) {
+      if (index === current || isTransitioning || index < 0 || index >= total) return;
+      isTransitioning = true;
+
+      // Reset scroll on current slide
+      const scrollEl = slides[current].querySelector('.slide-scroll');
+      if (scrollEl) scrollEl.scrollTop = 0;
+
+      slides[current].classList.remove('active');
+      slides[current].classList.add('exiting');
+
+      // Reset animation classes on exiting slide's children
+      slides[current].querySelectorAll('.anim-item').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(15px)';
+      });
+
+      setTimeout(() => {
+        slides[current].classList.remove('exiting');
+
+        current = index;
+        visited.add(current);
+
+        slides[current].classList.add('active');
+
+        // Trigger animations on new slide
+        slides[current].querySelectorAll('.anim-item').forEach(el => {
+          el.style.opacity = '';
+          el.style.transform = '';
+        });
+
+        updateNav();
+        isTransitioning = false;
+      }, 350);
+    }
+
+    function updateNav() {
+      const section = slides[current].dataset.section || '';
+      navSection.textContent = section;
+      navCounter.textContent = `${current + 1} / ${total}`;
+
+      document.querySelectorAll('.nav-dot').forEach((dot, i) => {
+        dot.classList.toggle('active', i === current);
+        dot.classList.toggle('visited', visited.has(i) && i !== current);
+      });
+    }
+
+    function next() { goTo(current + 1); }
+    function prev() { goTo(current - 1); }
+
+    btnNext.addEventListener('click', next);
+    btnPrev.addEventListener('click', prev);
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); next(); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
+      else if (e.key === 'f' || e.key === 'F') {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+          document.exitFullscreen();
+        }
+      }
+    });
+
+    // Touch support
+    let touchStartX = 0;
+    document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; }, { passive: true });
+    document.addEventListener('touchend', (e) => {
+      const diff = touchStartX - e.changedTouches[0].clientX;
+      if (Math.abs(diff) > 60) {
+        if (diff > 0) next();
+        else prev();
+      }
+    }, { passive: true });
+
+    // Hide keyboard hint after 5 seconds
+    setTimeout(() => {
+      kbdHint.style.opacity = '0';
+      setTimeout(() => { kbdHint.style.display = 'none'; }, 2000);
+    }, 5000);
+
+    updateNav();
+  })();
+</script>
+</body>
+</html>
